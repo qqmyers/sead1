@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -34,10 +35,12 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAccessLevelResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetCollectionAccessLevel;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.VersionCleaner;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
@@ -88,8 +91,8 @@ public class ConfigurationWidget extends Composite {
         // server updates.
         mainPanel.add(createUpdateSection());
 
-        // vivo configuration.
-        mainPanel.add(createVIVOConfigurationSection(configuration));
+        //Make collection public configuration.
+        mainPanel.add(createChangeCollectionAccessConfigurationSection(configuration));
 
         // va configuration.
         mainPanel.add(createPublicationConfigurationSection(configuration));
@@ -507,6 +510,7 @@ public class ConfigurationWidget extends Composite {
         final Anchor updateAnchor = new Anchor("Update Context");
         updateAnchor.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
+
                 updateAnchor.setEnabled(false);
                 updateAnchor.setText("Update Context Running...");
                 dispatchAsync.execute(new ContextConvert(), new AsyncCallback<EmptyResult>() {
@@ -552,35 +556,41 @@ public class ConfigurationWidget extends Composite {
         return dp;
     }
 
-    private DisclosurePanel createVIVOConfigurationSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "VIVO Configuration", new String[] { "VIVO Query Endpoint", "VIVO Identifier Prefix" }, new ConfigurationKey[] { ConfigurationKey.VIVOQUERYURL, ConfigurationKey.VIVOIDENTIFIERURL }, false);
-    }
+    private DisclosurePanel createChangeCollectionAccessConfigurationSection(ConfigurationResult configuration) {
 
-    private DisclosurePanel createSimpleConfigurationSection(ConfigurationResult configuration, String sectionLabel, String keyLabel, final ConfigurationKey configKey, boolean startOpen) {
-        return createSimpleConfigurationSection(configuration, sectionLabel, new String[] { keyLabel }, new ConfigurationKey[] { configKey }, startOpen);
-    }
-
-    private DisclosurePanel createSimpleConfigurationSection(ConfigurationResult configuration, String sectionLabel, final String keyLabels[], final ConfigurationKey[] configKeys, boolean startOpen) {
-
-        DisclosurePanel dp = new DisclosurePanel(sectionLabel);
+        DisclosurePanel dp = new DisclosurePanel("Change Collection Access");
         dp.addStyleName("datasetDisclosurePanel");
-        dp.setOpen(startOpen);
+        dp.setOpen(false);
         VerticalPanel vp = new VerticalPanel();
         vp.setWidth("100%");
         dp.add(vp);
 
-        /*HorizontalPanel hp = new HorizontalPanel();
-        vp.add(hp);*/
-
+        String accessLabel = configuration.getConfiguration(ConfigurationKey.AccessLevelLabel);
+        final String accessLevelDefault = configuration.getConfiguration(ConfigurationKey.AccessLevelDefault);
+        final String[] accessLevels = configuration.getConfiguration(ConfigurationKey.AccessLevelValues).split(",");
         final FlexTable table = new FlexTable();
-        for (int i = 0; i < keyLabels.length; i++ ) {
-            table.setText(i, 0, keyLabels[i]);
-            final TextBox key = new TextBox();
-            key.addStyleName("multiAnchor");
-            key.setText(configuration.getConfiguration(configKeys[i]));
-            key.setVisibleLength(80);
-            table.setWidget(i, 1, key);
+        int idx = 0;
+
+        table.setText(idx, 0, "Collection ID");
+        final TextBox parent = new TextBox();
+        parent.addStyleName("multiAnchor");
+        parent.setText("tag:...");
+        parent.setVisibleLength(80);
+        table.setWidget(idx, 1, parent);
+        idx++;
+        //Sort order
+        final LabeledListBox accessOptions = new LabeledListBox("");
+        accessOptions.addStyleName("pagingLabel");
+
+        for (int i = 0; i < accessLevels.length; i++ ) {
+            accessOptions.addItem(accessLevels[i], "" + i);
         }
+        accessOptions.addItem("Space Default: " + accessLevels[Integer.parseInt(accessLevelDefault)], "" + accessLevels.length);
+
+        accessOptions.setSelected(accessLevels.length);
+        table.setText(idx, 0, accessLabel);
+        table.setWidget(idx, 1, accessOptions);
+
         /*hp.add(key);*/
         vp.add(table);
         // buttons
@@ -590,56 +600,109 @@ public class ConfigurationWidget extends Composite {
         Button button = new Button("Submit", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new SetCollectionAccessLevel(parent.getText(), Integer.parseInt(accessOptions.getSelected())), new AsyncCallback<GetAccessLevelResult>() {
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Failure Setting " + accessLevels[Integer.parseInt(accessOptions.getSelected())] + " access for " + parent.getText() + " - See server log for details");
+                        GWT.log("Could not get/set accesslevel information", caught);
+                    }
 
-                //FixMe - put both vals in the same query - see mail section above
-                for (int i = 0; i < keyLabels.length; i++ ) {
-                    final int j = i;
-                    SetConfiguration query = new SetConfiguration(MMDB.getUsername());
-                    query.setConfiguration(configKeys[j], ((TextBox) table.getWidget(j, 1)).getText());
-
-                    dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log("Could not set configuration value for " + configKeys[j], caught);
-                        }
-
-                        @Override
-                        public void onSuccess(ConfigurationResult result) {
-                            ((TextBox) table.getWidget(j, 1)).setText(result.getConfiguration(configKeys[j]));
-                        }
-                    });
+                    public void onSuccess(GetAccessLevelResult result) {
+                        Window.alert("Success! " + accessLevels[Integer.parseInt(accessOptions.getSelected())] + " set recursively on contents of collection " + parent.getText());
+                        parent.setText("tag:...");
+                        accessOptions.setSelected(accessLevelDefault);
+                    }
                 }
+                        );
             }
         });
         hp.add(button);
-
-        button = new Button("Reset", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                //FixMe - put both vals in the same query - see mail section above
-                for (int i = 0; i < keyLabels.length; i++ ) {
-                    final int j = i;
-
-                    dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), configKeys[j]), new AsyncCallback<ConfigurationResult>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log("Could not get configuration value for" + configKeys[j], caught);
-                        }
-
-                        @Override
-                        public void onSuccess(ConfigurationResult result) {
-                            ((TextBox) table.getWidget(j, 1)).setText(result.getConfiguration(configKeys[j]));
-                        }
-                    });
-                }
-            }
-        });
-        button.addStyleName("multiAnchor");
-        hp.add(button);
-
         return dp;
 
     }
+
+    /*
+        private DisclosurePanel createSimpleConfigurationSection(ConfigurationResult configuration, String sectionLabel, String keyLabel, final ConfigurationKey configKey, boolean startOpen) {
+            return createSimpleConfigurationSection(configuration, sectionLabel, new String[] { keyLabel }, new ConfigurationKey[] { configKey }, startOpen);
+        }
+
+
+        private DisclosurePanel createSimpleConfigurationSection(ConfigurationResult configuration, String sectionLabel, final String keyLabels[], final ConfigurationKey[] configKeys, boolean startOpen) {
+
+            DisclosurePanel dp = new DisclosurePanel(sectionLabel);
+            dp.addStyleName("datasetDisclosurePanel");
+            dp.setOpen(startOpen);
+            VerticalPanel vp = new VerticalPanel();
+            vp.setWidth("100%");
+            dp.add(vp);
+
+            final FlexTable table = new FlexTable();
+            for (int i = 0; i < keyLabels.length; i++ ) {
+                table.setText(i, 0, keyLabels[i]);
+                final TextBox key = new TextBox();
+                key.addStyleName("multiAnchor");
+                key.setText(configuration.getConfiguration(configKeys[i]));
+                key.setVisibleLength(80);
+                table.setWidget(i, 1, key);
+            }
+            //hp.add(key);
+            vp.add(table);
+            // buttons
+            HorizontalPanel hp = new HorizontalPanel();
+            vp.add(hp);
+
+            Button button = new Button("Submit", new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+
+                    //FixMe - put both vals in the same query - see mail section above
+                    for (int i = 0; i < keyLabels.length; i++ ) {
+                        final int j = i;
+                        SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                        query.setConfiguration(configKeys[j], ((TextBox) table.getWidget(j, 1)).getText());
+
+                        dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Could not set configuration value for " + configKeys[j], caught);
+                            }
+
+                            @Override
+                            public void onSuccess(ConfigurationResult result) {
+                                ((TextBox) table.getWidget(j, 1)).setText(result.getConfiguration(configKeys[j]));
+                            }
+                        });
+                    }
+                }
+            });
+            hp.add(button);
+
+            button = new Button("Reset", new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    //FixMe - put both vals in the same query - see mail section above
+                    for (int i = 0; i < keyLabels.length; i++ ) {
+                        final int j = i;
+
+                        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), configKeys[j]), new AsyncCallback<ConfigurationResult>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Could not get configuration value for" + configKeys[j], caught);
+                            }
+
+                            @Override
+                            public void onSuccess(ConfigurationResult result) {
+                                ((TextBox) table.getWidget(j, 1)).setText(result.getConfiguration(configKeys[j]));
+                            }
+                        });
+                    }
+                }
+            });
+            button.addStyleName("multiAnchor");
+            hp.add(button);
+
+            return dp;
+        }
+    */
 
     private DisclosurePanel createPublicationConfigurationSection(ConfigurationResult configuration) {
 

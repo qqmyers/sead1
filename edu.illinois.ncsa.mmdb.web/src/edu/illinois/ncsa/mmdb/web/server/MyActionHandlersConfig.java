@@ -127,6 +127,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestPublicationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RevokePublicationRequestHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetAccessLevelHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetCollectionAccessLevelHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
@@ -247,6 +248,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new RevokePublicationRequestHandler());
         DispatchUtil.registerHandler(new VersionCleanerHandler());
         DispatchUtil.registerHandler(new EmailAdminsHandler());
+        DispatchUtil.registerHandler(new SetCollectionAccessLevelHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

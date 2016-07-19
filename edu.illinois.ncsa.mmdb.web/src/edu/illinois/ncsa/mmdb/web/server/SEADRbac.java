@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -249,7 +250,8 @@ public class SEADRbac extends RBAC {
         }
     }
 
-    public void setAccessLevel(Resource uri, Resource accessPredicate, int accesslevel) throws OperatorException {
+    public void setAccessLevel(Resource uri, Resource accessPredicate, int accessLevel) throws OperatorException {
+
         TripleWriter tw = new TripleWriter();
 
         // remove all levels
@@ -258,10 +260,42 @@ public class SEADRbac extends RBAC {
         }
 
         // add missing level
-        tw.add(new Triple(uri, accessPredicate, Resource.literal(accesslevel)));
+        tw.add(new Triple(uri, accessPredicate, Resource.literal(accessLevel)));
 
         // perform
         TupeloStore.getInstance().getContext().perform(tw);
+    }
+
+    public void bulkSetAccessLevel(ArrayList<UriRef> uriRefs, Resource accessPredicate, int accessLevel) throws OperatorException {
+        TripleWriter tw = null;
+        //Write in chunks of 100 entries
+        for (int i = 0; i < uriRefs.size(); i++ ) {
+
+            if (i % 100 == 0) { //First time and every 100
+                tw = new TripleWriter();
+            }
+            UriRef uri = uriRefs.get(i);
+            log.trace(i + " : Setting access: " + accessLevel + " for " + uri.toString());
+            // remove all levels
+            for (Triple t : TupeloStore.getInstance().getContext().match(uri, accessPredicate, null) ) {
+                tw.remove(t);
+            }
+
+            if (accessLevel != -1) {
+                // add missing level
+                tw.add(new Triple(uri, accessPredicate, Resource.literal(accessLevel)));
+            }
+
+            // perform
+            if (i % 100 == 99) {
+                TupeloStore.getInstance().getContext().perform(tw);
+                tw = null;
+            }
+        }
+        if (tw != null) {
+            TupeloStore.getInstance().getContext().perform(tw);
+
+        }
     }
 
     /**
