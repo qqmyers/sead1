@@ -616,7 +616,7 @@ body {
 	margin-right: 25px;
 }
 #header-logo-image {
-	width:194px;
+	width:154px;
 	float: left;
 	/*padding: 0 20px 0 20px;*/
 	max-width: 100%;
@@ -2797,7 +2797,7 @@ a#scroll-up:hover {
 	}
    #header-logo-image {
 	float:left;
-        width: 194px;
+        width: 154px;
         padding: 0;
    }
    #header-left-section{
@@ -2947,7 +2947,7 @@ a#scroll-up:hover {
 	}
    #header-logo-image {
 	float:left;
-        width: 194px;
+        width: 154px;
         padding: 0;
    }
    #header-left-section{
@@ -3099,7 +3099,7 @@ a#scroll-up:hover {
 	}
    #header-logo-image {
 	float: none;
-        width: 194px;
+        width: 154px;
         padding: 0;
    }
    #header-right-section{
@@ -3264,7 +3264,7 @@ a#scroll-up:hover {
 	}
    #header-logo-image {
 	float: none;
-        width: 194px;
+        width: 154px;
         padding: 0;
    }
    #header-right-section{
@@ -3424,7 +3424,7 @@ a#scroll-up:hover {
 	}
    #header-logo-image {
 	float: none;
-        width: 194px;
+        width: 154px;
         padding: 0;
    }
    #header-right-section{
@@ -3598,7 +3598,7 @@ a#scroll-up:hover {
 	}
    #header-logo-image {
 	float: none;
-        width: 194px;
+        width: 154px;
         padding: 0;
    }
    #header-right-section{
