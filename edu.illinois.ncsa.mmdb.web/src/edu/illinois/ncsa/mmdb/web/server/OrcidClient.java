@@ -58,11 +58,11 @@ public class OrcidClient {
         StringBuilder sb = new StringBuilder();
         sb.append("client_id=" + clientId + "&");
         sb.append("client_secret=" + clientSecret + "&");
-        sb.append("grant_type=" + "client_credentials&");
+        sb.append("grant_type=" + "authorization_code&");
         if (redirectURI != null) {
             sb.append("redirect_uri=" + redirectURI + "&");
         }
-        //sb.append("code=" + code);
+        sb.append("code=" + code);
 
         authorize.body(MediaType.APPLICATION_FORM_URLENCODED_TYPE, sb.toString());
 
@@ -97,6 +97,49 @@ public class OrcidClient {
 
     public static Oauth2ServerFlowUserInfoResult requestUserInfo(String id, String token) {
         Oauth2ServerFlowUserInfoResult result = new Oauth2ServerFlowUserInfoResult();
+
+        /* To use the public API, it appears that we need to separately request a SEAD token to call the /read-public scope api calls
+         * So, before making this call, we need to get our own token, separate from the one that the user's Ouath2 login creates.
+         */
+
+        String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
+        String clientSecret = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientSecret);
+        ClientRequest authorize = new ClientRequest(ORCID_TOKEN_REQUEST_URL);
+        authorize.followRedirects(true);
+        authorize.accept(MediaType.APPLICATION_JSON_TYPE);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("client_id=" + clientId + "&");
+        sb.append("client_secret=" + clientSecret + "&");
+        sb.append("scope=/read-public&");
+        sb.append("grant_type=" + "client_credentials&");
+
+        authorize.body(MediaType.APPLICATION_FORM_URLENCODED_TYPE, sb.toString());
+
+        try {
+            log.debug("Requesting public API token " + authorize.getUri());
+        } catch (Exception e1) {
+            log.error("Error requesting access token", e1);
+        }
+
+        try {
+            ClientResponse<String> clientResponse = authorize.post(String.class);
+            log.debug("Authorization status: " + clientResponse.getStatus());
+            log.debug("Authorization body: " + clientResponse.getEntity());
+            log.debug("Location: " + clientResponse.getLocation());
+            MultivaluedMap<String, String> headers = clientResponse.getHeaders();
+            for (String key : headers.keySet() ) {
+                log.debug(key + ": " + headers.get(key));
+            }
+            if (clientResponse.getStatus() == 200) {
+                String tokenString = clientResponse.getEntity();
+                org.json.JSONObject tokenObject = new org.json.JSONObject(tokenString);
+                token = (tokenObject.getString("access_token"));
+            }
+        } catch (Exception e) {
+            log.error("Failed to get public api token", e);
+        }
+        log.debug("Retrieved token for public api: " + token);
 
         try {
             URL url = new URL(ORCID_PUBLIC_API_BASE_URL + id + "/orcid-bio");

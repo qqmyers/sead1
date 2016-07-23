@@ -444,7 +444,12 @@ public class LoginPage extends Composite {
                                     }
                                 });
                                 //Set timer to renew credentials
+
                                 int time = result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L);
+                                //ORCID'S latest is 20 year lifetime - reduce this to a max of an hour...
+                                if (time > 3600) {
+                                    time = 3600;
+                                }
                                 if (time <= 0) {
                                     time = 1;
                                 }
