@@ -95,8 +95,12 @@ public class TagsPage extends Page {
 
                     @Override
                     public void onSuccess(GetTagsResult result) {
+                        boolean useCloud = false;
                         TreeMap<String, Integer> tags = result.getTags();
                         Iterator<String> iterator = tags.keySet().iterator();
+                        if (tags.size() <= 50) {
+                            useCloud = true;
+                        }
                         String uListString = "";
                         while (iterator.hasNext()) {
                             FlowPanel tagPanel = new FlowPanel();
@@ -115,15 +119,18 @@ public class TagsPage extends Page {
                                 tagPanel.add(tagCount);
                                 tagPanel.addStyleName("tagInPanel");
                                 tagsPanel.add(tagPanel);
-                                uListString = uListString + "<li><a href=\"#" + "tag?title=" + URL.encodeQueryString(tag) + "\" data-weight=\"" + tags.get(tag) + "\">" + tag + "</a></li>";
+                                if (useCloud) {
+                                    uListString = uListString + "<li><a href=\"#" + "tag?title=" + URL.encodeQueryString(tag) + "\" data-weight=\"" + tags.get(tag) + "\">" + tag + "</a></li>";
+                                }
                             }
                         }
-
-                        HTML list = new HTML();
-                        list.getElement().setId("weightedtaglist");
-                        list.setHTML("<ul>" + uListString + "</ul>");
-                        tagCloudPanel.add(list);
-                        startCloud();
+                        if (useCloud) {
+                            HTML list = new HTML();
+                            list.getElement().setId("weightedtaglist");
+                            list.setHTML("<ul>" + uListString + "</ul>");
+                            tagCloudPanel.add(list);
+                            startCloud();
+                        }
                     }
 
                 });
