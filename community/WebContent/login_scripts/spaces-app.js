@@ -10,7 +10,7 @@ Call an init from each wrapper and use .when to load content?
 seadSpaces.doInfoAjax = function(url, i) {
 	return $.ajax({
 		type : "GET",
-		timeout : '400',
+		timeout : '10000',
 		url : "GetSysInfo",
 		data : {
 			server : url
@@ -22,7 +22,7 @@ seadSpaces.doInfoAjax = function(url, i) {
 seadSpaces.doConfigAjax = function(url) {
 	return $.ajax({
 		type : "GET",
-		timeout : '400',
+		timeout : '10000',
 		url : "GetProjectInfo",
 		data : {
 			server : url
