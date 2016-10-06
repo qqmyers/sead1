@@ -57,7 +57,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
  * -metadataonly - just verify the existience of 1 and only 1 size and sha1, don't check blobs
  * -limit<N> - # of Datasets to process
  * -skip<N> - # to skip before starting
- * -ignoredeleted - don't bother with items that are deleted
+ * -deletedonly - just check items that are deleted
  * 
  * The rest of the argument list may the word All, or a list of identifiers for collections or datasets to check. 
  * (Checking a collection means recursively checking all datasets within it.)
