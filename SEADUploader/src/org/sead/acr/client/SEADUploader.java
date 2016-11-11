@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.swing.border.EmptyBorder;
+
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -1019,9 +1021,8 @@ public class SEADUploader {
 				JSONObject agent = new JSONObject();
 				content.put("Upload Path", path);
 				List<String> comments = new ArrayList<String>();
-				String tagValues = add2ResourceMetadata(content, context,
-						agent, comments, path, dir);
-
+				String tagValues = add2ResourceMetadata(content, context, agent, comments, path, dir);
+				
 				postMetadata(httpclient, server + "/api/datasets/" + datasetId
 						+ "/metadata.jsonld", dir.getAbsolutePath(), content,
 						context, agent);
@@ -1116,7 +1117,7 @@ public class SEADUploader {
 			String path, Resource item) {
 		Object tags = null;
 
-		JSONObject metadata = item.getMetadata();
+		JSONObject metadata = item.getMetadata();  //Empty for file resources
 		if (metadata.has("Metadata on Original")) {
 			JSONObject original = metadata
 					.getJSONObject("Metadata on Original");
@@ -1190,9 +1191,17 @@ public class SEADUploader {
 		// Flatten context for 2.0
 
 		for (String key : ((Set<String>) content.keySet())) {
+			if(rf!=null) { //importRO == true
 			String pred = rf.getURIForContextEntry(key);
 			if (pred != null) {
 				context.put(key, pred);
+			}
+			} else {
+				if(key.equals("Upload Path")) {
+					context.put(key, SEADUploader.FRBR_EO);
+				} else { //shouldn't happen 
+					println("Unrecognized Metadata Entry: " + key);
+				}
 			}
 		}
 		JSONObject me = get2me();
