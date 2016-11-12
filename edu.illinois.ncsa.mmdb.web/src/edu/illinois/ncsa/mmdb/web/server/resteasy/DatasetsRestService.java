@@ -64,6 +64,7 @@ import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.SecureHashMinter;
@@ -409,7 +410,7 @@ public class DatasetsRestService extends ItemServicesImpl {
             }
             if (valid) {
 
-                r = getDataFileBytes(itemId);
+                r = getDataFileBytes(itemId, false);
 
             }
 
@@ -423,34 +424,39 @@ public class DatasetsRestService extends ItemServicesImpl {
         return r;
     }
 
-    protected static Response getDataFileBytes(UriRef itemId) {
+    protected static Response getDataFileBytes(UriRef itemId, boolean head) {
         Response r = null;
         //Get file metadata
         Unifier uf = new Unifier();
         uf.addPattern(itemId, Dc.FORMAT, "mimetype");
         uf.addPattern(itemId, Dc.TITLE, "title");
-        uf.setColumnNames("mimetype", "title");
+        uf.addPattern(itemId, Files.LENGTH, "length");
+        uf.setColumnNames("mimetype", "title", "length");
         try {
             TupeloStore.getInstance().getContext().perform(uf);
             Tuple<Resource> metadata = uf.getResult().iterator().next();
             String mimetype = metadata.get(0).toString();
             String title = metadata.get(1).toString();
+            String length = metadata.get(2).toString();
+            if (!head) {
+                //Get Bytes
+                final BlobFetcher bf = new BlobFetcher();
+                bf.setSubject(itemId);
+                TupeloStore.getInstance().getContext().perform(bf);
 
-            //Get Bytes
-            final BlobFetcher bf = new BlobFetcher();
-            bf.setSubject(itemId);
-            TupeloStore.getInstance().getContext().perform(bf);
+                //Build output
+                StreamingOutput streamingResult = new StreamingOutput() {
 
-            //Build output
-            StreamingOutput streamingResult = new StreamingOutput() {
+                    @Override
+                    public void write(OutputStream output) throws IOException, WebApplicationException {
+                        IOUtils.copyLarge(bf.getInputStream(), output);
+                    }
+                };
 
-                @Override
-                public void write(OutputStream output) throws IOException, WebApplicationException {
-                    IOUtils.copyLarge(bf.getInputStream(), output);
-                }
-            };
-
-            r = Response.ok(streamingResult, mimetype).header("content-disposition", "attachement; filename = " + title).build();
+                r = Response.ok(streamingResult, mimetype).header("content-disposition", "attachement; filename = " + title).build();
+            } else {
+                r = Response.ok().header("content-disposition", "attachement; filename = " + title).header("content-type", mimetype).header("content-length", length).build();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             log.debug(e.getMessage());

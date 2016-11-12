@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -180,7 +181,52 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
             result.put("Failure", e.getMessage());
             return Response.status(Status.BAD_REQUEST).entity(result).build();
         }
-        return DatasetsRestService.getDataFileBytes(Resource.uriRef(id));
+        return DatasetsRestService.getDataFileBytes(Resource.uriRef(id), false);
+
+    }
+
+    /**
+     * Get a file for Aggregation
+     *
+     * @param id
+     *            - the ID of the file
+     *
+     * @return - The ORE map in json-ld
+     */
+    @HEAD
+    @Path("/{aggId}/files/{id}")
+    @Produces("application/json")
+    public Response headDataFile(@PathParam("aggId") String aggId, @Encoded @PathParam("id") String id, @QueryParam("pubtoken") String token, @javax.ws.rs.core.Context HttpServletRequest request) {
+        try {
+            TripleMatcher tMatcher = new TripleMatcher();
+            tMatcher.setSubject(Resource.uriRef(aggId));
+            tMatcher.setPredicate(Resource.uriRef("http://sead-data.net/vocab/hasSalt"));
+            c.perform(tMatcher);
+            String salt = null;
+            java.util.Iterator<Triple> iter = tMatcher.getResult().iterator();
+            if (iter.hasNext()) {
+                salt = iter.next().getObject().toString();
+            }
+
+            if ((token == null) || (!TokenStore.isValidToken(token, "/researchobjects/" + aggId + "/files/" + id, salt))) {
+                log.debug("Invalid pubtoken: " + token);
+                Map<String, String> result = new HashMap<String, String>(1);
+                result.put("Failure", "Invalid pubtoken");
+                return Response.status(Status.FORBIDDEN).entity(result).build();
+            }
+            id = URLDecoder.decode(id, "UTF-8");
+
+        } catch (UnsupportedEncodingException e) {
+            Map<String, String> result = new HashMap<String, String>(1);
+            result.put("Failure", "Could not decode resource id");
+            return Response.status(Status.BAD_REQUEST).entity(result).build();
+        } catch (OperatorException e) {
+            Map<String, String> result = new HashMap<String, String>(1);
+            log.error("Error Processing " + id, e);
+            result.put("Failure", e.getMessage());
+            return Response.status(Status.BAD_REQUEST).entity(result).build();
+        }
+        return DatasetsRestService.getDataFileBytes(Resource.uriRef(id), true);
 
     }
 

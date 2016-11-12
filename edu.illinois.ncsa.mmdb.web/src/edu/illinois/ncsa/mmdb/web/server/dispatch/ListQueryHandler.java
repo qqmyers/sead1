@@ -249,7 +249,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                 if (row.get(6) != null) {
                     if (row.get(6).asObject() instanceof Long) {
                         item.setSize(humanBytes((Long) row.get(6).asObject()));
-                    } else {
+                    } else {//FixMe - should be parsable as a long and could be made human readable...
                         item.setSize(row.get(6).getString());
                     }
                 }
