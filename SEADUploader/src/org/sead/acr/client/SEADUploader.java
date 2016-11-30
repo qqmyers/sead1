@@ -114,6 +114,8 @@ public class SEADUploader {
 	private static HashMap<String, String> roDataIdToNewId = new HashMap<String, String>();
 	private static HashMap<String, String> roCollIdToNewId = new HashMap<String, String>();
 	private static HashMap<String, String> roFolderProxy = new HashMap<String, String>();
+	
+	private static String CLOWDER_DEFAULT_VOCAB = "https://clowder.ncsa.illinois.edu/contexts/dummy";
 
 	public static void main(String args[]) throws Exception {
 
@@ -319,7 +321,7 @@ public class SEADUploader {
 
 						}
 						JSONObject context = new JSONObject();
-
+						context.put("@vocab", CLOWDER_DEFAULT_VOCAB);
 						// Create flattened context for 2.0
 						for (String key : ((Set<String>) content.keySet())) {
 							String pred = rf.getURIForContextEntry(key);
@@ -1189,7 +1191,7 @@ public class SEADUploader {
 		content.put("Upload Path", path);
 
 		// Flatten context for 2.0
-
+		context.put("@vocab", CLOWDER_DEFAULT_VOCAB);
 		for (String key : ((Set<String>) content.keySet())) {
 			if(rf!=null) { //importRO == true
 			String pred = rf.getURIForContextEntry(key);
@@ -1833,6 +1835,7 @@ public class SEADUploader {
 			CloseableHttpClient httpclient) throws IOException {
 		HttpEntity resEntity = null;
 		try {
+			singleContext.put("@vocab", CLOWDER_DEFAULT_VOCAB);
 			JSONObject meta = new JSONObject();
 			meta.put("content", singleContent);
 			meta.put("@context", singleContext);
