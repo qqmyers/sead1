@@ -146,7 +146,7 @@
 			<div id="header-text-nav-wrap" class="clearfix">
 	
 	<!-- #header-logo-image -->
-	<div id="header-left-section">
+	<div id="header-left-section" style="background-image:url(/projects/login_img/headback.PNG)" >
 		<div id="header-logo-image">
 			<a href="http://sead-data.net/" title="SEAD" rel="home"><img src="http://sead-data.net/wp-content/uploads/2014/06/logo.png" alt="SEAD"></a>
 		</div>
@@ -185,62 +185,71 @@
 
                        
        <!--header navigation begin-->
-          <div id="header-navigation">
-            <nav id="site-navigation" class="main-navigation"
-              role="navigation">
-              <h1 class="menu-toggle">Menu</h1>
-              <div class="menu-global-navigation-container">
-                <ul id="menu-global-navigation" class="menunav-menu">
-                  <li class="menu-item "><a href="http://sead-data.net/">Home</a></li>
-                  <li class="menu-item  menu-item-has-children "><a
-                    href="http://sead-data.net/about/">About</a>
-                    <ul class="sub-menu">
-                      <li class="menu-item"><a
-                        href="http://sead-data.net/about/sead-team/">Project
-                          Team</a></li>
-                      <li class="menu-item"><a
-                        href="http://sead-data.net/about/advisory-board/">Advisory
-                          Board</a></li>
-                          <li class="menu-item"><a
-                        href="http://sead-data.net/partners/">Partners</a></li>
-                      <li class="menu-item"><a
-                        href="http://sead-data.net/about/publicationspresentations/">Publications
-                          &amp; Presentations</a></li>
-                      <li class="menu-item"><a
-                        href="http://sead-data.net/about/newsevents/">News &amp;
-                          Events</a></li>
-                          <li class="menu-item"><a
-                        href="http://sead-data.net/subscribe-to-sead-updates/">Subscribe to SEAD Updates</a></li>
-                          <li class="menu-item"><a
-                        href="http://sead-data.net/about/contactus/">Contact Us</a></li>
-                    </ul></li>
-                  <li class="menu-item menu-item-has-children"><a
-                    href="http://sead-data.net/feature-tour/">Features Tour</a>
-                    <ul class="sub-menu">
-                      <li class="menu-item"><a
-                        href="http://sead-data.net/feature-tour/all-features/">All Features</a></li>
-                    
-                                          <li class="menu-item"><a
-                        href="http://sead-data.net/feature-tour/sead-support-for-data-management-plans/">Data Management Plan (DMP) Support</a></li>
-                    
-                                          <li class="menu-item"><a
-                        href="http://sead-data.net/feature-tour/tools-in-development/">Tools
-                          in Development</a></li>
-                    </ul></li>
-                  <li class="menu-item current-menu-item "><a
-                    href="https://sead.ncsa.illinois.edu/projects/">Project
-                      Spaces</a></li>
-                  <li class="menu-item menu-item-has-children"><a
-                    href="http://sead-data.net/help/">Help</a>
-                    <ul class="sub-menu">
-                      <li class="menu-item"><a
-                        href="http://sead-data.net/help/faq/">FAQ</a></li>
-                    </ul></li>
-                </ul>
-              </div>
-            </nav>
-          </div>
-          <!--header navigation end-->
+					<div id="header-navigation">
+						<nav id="site-navigation" class="main-navigation"
+							role="navigation">
+							<h1 class="menu-toggle">Menu</h1>
+							<div class="menu-global-navigation-container">
+								<ul id="menu-global-navigation" class="menunav-menu">
+									<li class="menu-item  menu-item-has-children "><a>About</a>
+										<ul class="sub-menu">
+<li class="menu-item"><a
+												href="http://sead-data.net/about-sead">About SEAD</a></li>
+<li class="menu-item"><a
+												href="http://sead-data.net/news">News</a></li>
+											<li class="menu-item"><a
+												href="http://sead-data.net/project-team">Project
+													Team</a></li>
+<li class="menu-item"><a
+												href="http://sead-data.net/contact">Contact Us</a></li>
+
+											<li class="menu-item"><a
+												href="http://sead-data.net/advisory-board">Advisory
+													Board</a></li>
+					<li class="menu-item"><a			href="http://sead-data.net/about/publicationspresentations">Publications &amp; Presentations</a></li>
+					<li class="menu-item"><a			href="http://sead-data.net/about/standards">Data Mangement Standards and Practices</a></li>
+					</ul></li>
+
+									<li class="menu-item menu-item-has-children"><a>Services</a>
+										<ul class="sub-menu">
+											<li class="menu-item"><a
+												href="http://sead-data.net/features-tour">Features Tour</a></li>
+										
+										                      <li class="menu-item"><a
+                        href="http://sead-data.net/support-your-data-management-plan-dmp/">Data Management Plan Support</a></li>
+                                      </ul></li>
+									<li class="menu-item current-menu-item menu-item-has-children"><a>Project
+											Spaces</a>
+									<ul class="sub-menu">
+											<li class="menu-item"><a
+												href="https://sead.ncsa.illinois.edu/projects">1.5 Project Spaces</a></li>
+										
+										                      <li class="menu-item"><a
+                        href="https://sead2.ncsa.illinois.edu/spaces">2.0 Project Spaces</a></li>
+                                      </ul>
+</li>
+									<li class="menu-item menu-item-has-children"><a>Repositories</a>
+										<ul class="sub-menu">
+											<li class="menu-item"><a
+												href="http://sead-data.net/connect-your-repository-to-sead">Connect Your Repository To SEAD</a></li>
+							<li class="menu-item"><a
+												href="http://sead-data.net/partners">SEAD Partners</a></li>
+</ul></li>
+
+									<li class="menu-item menu-item-has-children"><a>Help</a>
+										<ul class="sub-menu">
+											<li class="menu-item"><a
+												href="http://sead-data.net/faqs">FAQs</a></li>
+							<li class="menu-item"><a
+												href="http://sead-data.net/help-topics">Help Topics</a></li>
+
+										</ul></li>
+								</ul>
+							</div>
+						</nav>
+					</div>
+					<!--header navigation end-->
+
 	</div><!-- #header-left-section -->
 	</div>
 
