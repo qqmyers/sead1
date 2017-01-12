@@ -86,7 +86,7 @@ public class ContextUpdater {
     private static Log           log                 = LogFactory.getLog(ContextUpdater.class);
 
     public static final Resource CONTEXT_VERSION_URI = Resource.uriRef("tag:cet.ncsa.uiuc.edu,2008:/context/version"); //$NON-NLS-1$
-    public static final int      CONTEXT_VERSION_NO  = 11;
+    public static final int      CONTEXT_VERSION_NO  = 12;
 
     /**
      * This will update the context to version CONTEXT_VERSION_NO. If the
@@ -162,6 +162,9 @@ public class ContextUpdater {
         if (force || (version < 12)) {
             updateDOIs(context);
         }
+        if (force || (version < 13)) {
+            removeEmptyDescriptions(context);
+        }
 
         // Mark context as updated removing all old versions first.
         TripleWriter tw = new TripleWriter();
@@ -177,6 +180,31 @@ public class ContextUpdater {
         updateVersion(context, tw);
 
         log.info("Context is updated to version " + CONTEXT_VERSION_NO);
+    }
+
+    /**
+     * At some point in the past, empty descriptions were created for Datasets.
+     * This update looks for these triples on older Datasets (and Collections
+     * although its not confirmed that they are affected)
+     * and removes them.
+     *
+     * @throws OperatorException
+     */
+    private static void removeEmptyDescriptions(Context context) throws OperatorException {
+        TripleMatcher tm = new TripleMatcher();
+        tm.match(null, Dc.DESCRIPTION, null);
+        context.perform(tm);
+        long count = 0l;
+        TripleWriter tw = new TripleWriter();
+        for (Triple t : tm.getResult() ) {
+            String desc = t.getObject().toString();
+            if (desc.length() == 0) {
+                tw.remove(t);
+                count++;
+            }
+        }
+        context.perform(tw);
+        log.info(count + " zero length descriptions removed.");
     }
 
     private static void updateDOIs(Context context) throws OperatorException {
