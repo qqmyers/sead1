@@ -184,23 +184,30 @@ public class ContextUpdater {
 
     /**
      * At some point in the past, empty descriptions were created for Datasets.
-     * This update looks for these triples on older Datasets (and Collections
-     * although its not confirmed that they are affected)
+     * This update looks for these triples on older Datasets
      * and removes them.
      *
      * @throws OperatorException
      */
     private static void removeEmptyDescriptions(Context context) throws OperatorException {
-        TripleMatcher tm = new TripleMatcher();
-        tm.match(null, Dc.DESCRIPTION, null);
-        context.perform(tm);
+        Unifier uf = new Unifier();
+        uf.addPattern("data", Rdf.TYPE, Cet.DATASET);
+        uf.addColumnName("data");
+        uf.addPattern("data", Dc.DESCRIPTION, "desc");
+        uf.addColumnName("desc");
+
+        context.perform(uf);
         long count = 0l;
         TripleWriter tw = new TripleWriter();
-        for (Triple t : tm.getResult() ) {
-            String desc = t.getObject().toString();
+        for (Tuple<Resource> t : uf.getResult() ) {
+            String desc = t.get(1).toString();
             if (desc.length() == 0) {
-                tw.remove(t);
+                tw.remove(t.get(0), Dc.DESCRIPTION, t.get(1));
                 count++;
+                if (count % 1000 == 0) {
+                    context.perform(tw);
+                    tw = new TripleWriter();
+                }
             }
         }
         context.perform(tw);
