@@ -257,7 +257,7 @@ public class MetadataAnalysis extends MediciToolBase {
 
     private static String csvEscapeString(String s) {
         if (s.contains(",") || s.contains("\n") || s.contains("\"")) {
-            s.replace("\"", "\"\"");
+            s = s.replace("\"", "\"\"");
             s = "\"" + s + "\"";
         }
         return s;
