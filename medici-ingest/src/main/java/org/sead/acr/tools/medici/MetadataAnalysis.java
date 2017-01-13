@@ -50,6 +50,7 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
@@ -80,6 +81,9 @@ public class MetadataAnalysis extends MediciToolBase {
     private static long        processCount       = 0l;
     private static boolean     collections        = false;
 
+    static private Set<UriRef> terms              = new HashSet<UriRef>();
+    static private Set<UriRef> relationships      = new HashSet<UriRef>();
+
     // Stats:
     private static long        totalMetadata      = 0l;
     private static long        totalRelationships = 0l;
@@ -88,53 +92,20 @@ public class MetadataAnalysis extends MediciToolBase {
 
     public static void main(String[] args) throws Exception {
 
-        init("metadata-log-", false); // No beansession needed
+        init("metadata2-log-", false); // No beansession needed
 
-        File csvFile = new File("metadata-log-" + System.currentTimeMillis() + ".csv");
+        File csvFile = new File("metadata2-log-" + System.currentTimeMillis() + ".csv");
         try {
             csvPw = new PrintWriter(new FileWriter(csvFile));
         } catch (Exception e) {
             println(e.getMessage());
         }
-
-        for (String arg : args) {
-            println("Arg is : " + arg);
-            if (arg.equalsIgnoreCase("-collections")) {
-                collections = true;
-                println("Metadata Only Mode");
-            } else if (arg.startsWith("-limit")) {
-                max = Long.parseLong(arg.substring(6));
-                println("Max dataset count: " + max);
-            } else if (arg.startsWith("-skip")) {
-                skip = Long.parseLong(arg.substring(5));
-                println("Skip dataset count: " + skip);
-            }
-        }
-
-        // go through arguments
-        for (String arg : args) {
-            if (!((arg.equalsIgnoreCase("-collections")) || (arg.startsWith("-limit")) || (arg.startsWith("-skip")) || arg.equalsIgnoreCase("-deletedonly") || arg
-                    .equalsIgnoreCase("-addmissinghashes"))) {
-                if (arg.equalsIgnoreCase("All")) {
-                    addToDatasetList(null);
-                } else {
-                    try {
-                        addToDatasetList(Resource.uriRef(arg));
-
-                    } catch (Exception e) {
-                        println("Unable to retrieve datasets for argument: " + arg + ", Error is " + e.getMessage());
-                    }
-                }
-            }
-        }
         println("Starting Metadata Analysis: ");
-        println(datasets.size() + " Datasets to test");
-        loadTerms();
-        loadRelationships();
+        getGoodList();
+        checkTerms();
+        checkRelationships();
         processCount = 0l;
-        checkDatasets();
         println("Metadata Analysis Complete: Final Stats");
-        println(datasets.size() + " Datasets tested");
         println("Total metadata entries: " + totalMetadata);
         println("Total relationship entries: " + totalRelationships);
         flushLog();
@@ -142,7 +113,7 @@ public class MetadataAnalysis extends MediciToolBase {
         csvPw.close();
     }
 
-    private static void loadRelationships() {
+    private static void checkRelationships() {
 
         Unifier uf = new Unifier();
         uf.addPattern("rel", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/Relationship"));
@@ -153,16 +124,47 @@ public class MetadataAnalysis extends MediciToolBase {
             println("Relationships:");
             for (Tuple t : uf.getResult()) {
                 println(((Resource) t.get(0)).toString());
-                relationships.add((Resource) t.get(0));
+                relationships.add((UriRef) t.get(0));
             }
         } catch (OperatorException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         println("\n\n");
+
+        for (UriRef t : relationships) {
+            long relCount = getTriples(t);
+            println("Found " + relCount + " entries");
+            totalRelationships += relCount;
+        }
     }
 
-    private static void loadTerms() {
+    private static long getTriples(UriRef t) {
+
+        println("Retrieving: " + t.toString());
+        Unifier uf2 = new Unifier();
+        uf2.addPattern("sub", t, "val");
+        uf2.addColumnName("sub");
+        uf2.addColumnName("val");
+        long entryCount = 0l;
+        try {
+            context.perform(uf2);
+
+            for (Tuple<Resource> entry : uf2.getResult()) {
+                UriRef subject = (UriRef) entry.get(0);
+                if (datasets.contains(subject)) {
+                    printRow(subject.toString(), t.toString(), ((Resource) entry.get(1)).toString());
+                    entryCount++;
+                }
+            }
+        } catch (OperatorException e) {
+            println("Failed to find entries for: " + t.toString());
+            e.printStackTrace();
+        }
+        return entryCount;
+    }
+
+    private static void checkTerms() {
 
         Unifier uf = new Unifier();
         uf.addPattern("term", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/userMetadataField"));
@@ -171,10 +173,10 @@ public class MetadataAnalysis extends MediciToolBase {
         try {
             context.perform(uf);
             println("Terms:");
-            for (Tuple t : uf.getResult()) {
+            for (Tuple<Resource> t : uf.getResult()) {
                 if (!((Resource) t.get(0)).equals(Resource.uriRef("http://purl.org/dc/terms/hasPart"))) {
                     println(((Resource) t.get(0)).toString());
-                    terms.add((Resource) t.get(0));
+                    terms.add((UriRef) t.get(0));
                 }
             }
         } catch (OperatorException e) {
@@ -182,149 +184,54 @@ public class MetadataAnalysis extends MediciToolBase {
             e.printStackTrace();
         }
         println("\n\n");
+
+        for (UriRef t : terms) {
+            long termCount = getTriples(t);
+            println("Found " + termCount + " entries");
+            totalMetadata += termCount;
+        }
     }
 
     private static HashSet<UriRef> datasets = new HashSet<UriRef>();
 
-    private static void addToDatasetList(UriRef id) throws OperatorException, IOException {
-        if (id == null) {
-            Unifier uf = new Unifier();
-            if (collections) {
-                uf.addPattern("data", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
-            } else {
-                uf.addPattern("data", Rdf.TYPE, Cet.DATASET);
-            }
-            uf.addColumnName("data");
-            uf.addPattern("data", DcTerms.IS_REPLACED_BY, "del", true);
-            uf.addColumnName("del");
+    private static void getGoodList() throws OperatorException, IOException {
 
-            context.perform(uf);
-            for (Tuple t : uf.getResult()) {
-
-                if (t.get(1) == null) {
-                    processCount++;
-
-                    if (processCount > skip) {
-                        addCount++;
-                        if (addCount <= max) {
-                            datasets.add((UriRef) t.get(0));
-                        }
-                    }
-                }
-            }
-
-        } else {
-            // Decide if it's a dataset or collections
-            TripleMatcher tMatcher = new TripleMatcher();
-            tMatcher.match(id, Rdf.TYPE, Cet.DATASET);
-            context.perform(tMatcher);
-            if (tMatcher.getResult().size() != 0) {
-                processCount++;
-                if (processCount > skip) {
-                    addCount++;
-                    if (addCount <= max) {
-                        // Note - ignoring ignoredelete flag if you specifically
-                        // ask for this dataset
-                        datasets.add(id);
-                    }
-                }
-            } else {
-                // Recursively get Dataset children of Collection
-                addDatasetsForCollection(id);
-            }
-
-        }
-    }
-
-    private static void addDatasetsForCollection(UriRef col) {
         Unifier uf = new Unifier();
-        uf.addPattern(col, Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
-        uf.addPattern(col, DcTerms.HAS_PART, "data");
         uf.addPattern("data", Rdf.TYPE, Cet.DATASET);
-
-        uf.addColumnName("data");
         uf.addPattern("data", DcTerms.IS_REPLACED_BY, "del", true);
+        uf.addColumnName("data");
         uf.addColumnName("del");
 
-        try {
-            context.perform(uf);
-            for (Tuple<Resource> data : uf.getResult()) {
-                if (data.get(1) == null) {
-                    processCount++;
-
-                    if (processCount > skip) {
-                        addCount++;
-                        if (addCount <= max) {
-                            datasets.add((UriRef) data.get(0));
-                        }
-                    }
-
-                }
-            }
-            Unifier uf2 = new Unifier();
-            uf2.addPattern(col, Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
-            uf2.addPattern(col, DcTerms.HAS_PART, "coll");
-            uf2.addPattern("coll", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
-            uf2.addColumnName("coll");
-            uf2.addPattern("coll", DcTerms.IS_REPLACED_BY, "del", true);
-            uf2.addColumnName("del");
-            context.perform(uf2);
-
-            for (Tuple<Resource> coll : uf2.getResult()) {
-                if (coll.get(1) == null) {
-
-                    addDatasetsForCollection((UriRef) coll.get(0));
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error for " + col.toString() + ". " + e.getMessage());
-        }
-
-    }
-
-    private final static UriRef  hasFilesize   = Resource.uriRef("tag:tupeloproject.org,2006:/2.0/files/length");
-    private final static UriRef  hasSHA1       = Resource.uriRef("http://sead-data.net/terms/hasSHA1Digest");
-
-    static private Set<Resource> terms         = new HashSet<Resource>();
-    static private Set<Resource> relationships = new HashSet<Resource>();
-
-    static long                  count         = 0l;
-
-    private static void checkDatasets() {
-
-        for (UriRef ds : datasets) {
-            // println("Processing: " + ds.toString());
-            processCount++;
-            count++;
-
-            TripleFetcher tf = new TripleFetcher();
-            tf.setSubject(ds);
-            try {
-                context.perform(tf);
-
-                for (Triple t : tf.getResult()) {
-                    if (terms.contains(t.getPredicate())) {
-                        printRow(t.getSubject().toString(), t.getPredicate().toString(), t.getObject().toString());
-                        totalMetadata++;
-                    }
-                    if (relationships.contains(t.getPredicate())) {
-                        printRow(t.getSubject().toString(), t.getPredicate().toString(), t.getObject().toString());
-                        totalRelationships++;
-                    }
-
-                }
-            } catch (OperatorException e) {
-                println("Could not process " + ds.toString() + ": " + e.getMessage());
-            }
-
-            if (count == 100) {
-                count = 0;
-                println("\nProcessed Count: " + processCount + "\n");
+        context.perform(uf);
+        for (Tuple<Resource> t : uf.getResult()) {
+            if (t.get(1) == null) {
+                datasets.add((UriRef) t.get(0));
+                processCount++;
             }
         }
+        println("Found " + processCount + " datasets");
+
+        Unifier uf2 = new Unifier();
+        uf2.addPattern("data", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+        uf2.addPattern("data", DcTerms.IS_REPLACED_BY, "del", true);
+        uf2.addColumnName("data");
+        uf2.addColumnName("del");
+
+        long colCount = 0l;
+        context.perform(uf2);
+        for (Tuple<Resource> t : uf2.getResult()) {
+            if (t.get(1) == null) {
+                datasets.add((UriRef) t.get(0));
+                colCount++;
+            }
+        }
+        println("Found " + colCount + " collections.");
+        processCount += colCount;
     }
 
-    static int printCount = 0;
+    static long count      = 0l;
+
+    static int  printCount = 0;
 
     private static void printRow(String s, String p, String o) {
         s = csvEscapeString(s);
