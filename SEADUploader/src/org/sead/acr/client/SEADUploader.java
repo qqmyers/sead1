@@ -75,7 +75,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
  * 
  * In addition to sending files and creating a SEAD collection/dataset (1.5) or
  * Dataset/Folder/File (2.0) structure, the Uploader adds path metadata, usable
- * in detecting whether an item has already been created/uplaoded. For
+ * in detecting whether an item has already been created/uploaded. For
  * publications, it also sends metadata, tags, comments, and spatial reference
  * metadata, performing some mapping to clarify when metadata applies only to
  * the original/published version and when the new live copy 'inherits' the
@@ -114,7 +114,7 @@ public class SEADUploader {
 	private static HashMap<String, String> roDataIdToNewId = new HashMap<String, String>();
 	private static HashMap<String, String> roCollIdToNewId = new HashMap<String, String>();
 	private static HashMap<String, String> roFolderProxy = new HashMap<String, String>();
-	
+
 	private static String CLOWDER_DEFAULT_VOCAB = "https://clowder.ncsa.illinois.edu/contexts/dummy";
 
 	public static void main(String args[]) throws Exception {
@@ -1011,24 +1011,34 @@ public class SEADUploader {
 			}
 			if (datasetId != null) {
 
-				// FixMe - add Metadata
-				/*
-				 * addLiteralMetadata(meb, FRBR_EO, path);
-				 * 
-				 * // Add metadata for published resources
-				 */
-
+				// Add Metadata
+				
 				JSONObject content = new JSONObject();
 				JSONObject context = new JSONObject();
 				JSONObject agent = new JSONObject();
+				List<String> creators = new ArrayList<String>();
 				content.put("Upload Path", path);
 				List<String> comments = new ArrayList<String>();
-				String tagValues = add2ResourceMetadata(content, context, agent, comments, path, dir);
+				//Should be true for all PublishedResources, never for files...
+				if (dir instanceof PublishedResource) {
+					((PublishedResource)dir).getAndRemoveCreator(creators);
+				}
 				
+				String creatorPostUri = server + "/api/datasets/" + datasetId
+						+ "/creator";
+				for(String creator: creators) {
+					postDatasetCreator(creator, creatorPostUri, httpclient);
+				}
+				
+				String tagValues = add2ResourceMetadata(content, context,
+						agent, comments, path, dir);
+
 				postMetadata(httpclient, server + "/api/datasets/" + datasetId
 						+ "/metadata.jsonld", dir.getAbsolutePath(), content,
 						context, agent);
-
+				if(creators!=null) {
+					
+				}
 				// FixMe Add tags
 				if (tagValues != null) {
 					HttpPost tagPost = new HttpPost(server + "/api/datasets/"
@@ -1115,11 +1125,11 @@ public class SEADUploader {
 
 	@SuppressWarnings("unchecked")
 	private static String add2ResourceMetadata(JSONObject content,
-			JSONObject context, JSONObject agent, List<String> comments,
+			JSONObject context, JSONObject agent,  List<String> comments,
 			String path, Resource item) {
 		Object tags = null;
 
-		JSONObject metadata = item.getMetadata();  //Empty for file resources
+		JSONObject metadata = item.getMetadata(); // Empty for file resources
 		if (metadata.has("Metadata on Original")) {
 			JSONObject original = metadata
 					.getJSONObject("Metadata on Original");
@@ -1139,6 +1149,8 @@ public class SEADUploader {
 				original.remove("GeoPoint");
 
 			}
+
+
 			if (original.has("Comment")) {
 				Object comObject = original.get("Comment");
 				if (comObject instanceof JSONArray) {
@@ -1193,15 +1205,15 @@ public class SEADUploader {
 		// Flatten context for 2.0
 		context.put("@vocab", CLOWDER_DEFAULT_VOCAB);
 		for (String key : ((Set<String>) content.keySet())) {
-			if(rf!=null) { //importRO == true
-			String pred = rf.getURIForContextEntry(key);
-			if (pred != null) {
-				context.put(key, pred);
-			}
+			if (rf != null) { // importRO == true
+				String pred = rf.getURIForContextEntry(key);
+				if (pred != null) {
+					context.put(key, pred);
+				}
 			} else {
-				if(key.equals("Upload Path")) {
+				if (key.equals("Upload Path")) {
 					context.put(key, SEADUploader.FRBR_EO);
-				} else { //shouldn't happen 
+				} else { // shouldn't happen
 					println("Unrecognized Metadata Entry: " + key);
 				}
 			}
@@ -1654,7 +1666,15 @@ public class SEADUploader {
 						agent, comments, path, file);
 				String abs = null;
 				if (content.has("Abstract")) {
-					abs = content.getString("Abstract").toString();
+
+					if (content.get("Abstract") instanceof JSONArray) {
+						//Convert multiple abstrascts into 1 so it fits Clowder's single description field
+						//Could concatenate, but JSON will help if anyone wants to separate abstracts after migration
+						abs = ((JSONArray) content.getJSONArray("Abstract"))
+								.toString(2);
+					} else {
+						abs = content.getString("Abstract").toString();
+					}
 					content.remove("Abstract");
 					context.remove("Abstract");
 				}
@@ -1865,6 +1885,38 @@ public class SEADUploader {
 		}
 
 	}
+	
+	private static void postDatasetCreator(String creator,
+			String uri, CloseableHttpClient httpclient) throws IOException {
+		HttpEntity resEntity = null;
+		try {
+			JSONObject body = new JSONObject();
+			body.put("creator", creator);
+
+			StringEntity se2 = new StringEntity(body.toString());
+			se2.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+					"application/json"));
+
+			HttpPost creatorPost = new HttpPost(uri);
+
+			creatorPost.setEntity(se2);
+
+			CloseableHttpResponse creatorResponse = httpclient.execute(creatorPost,
+					localContext);
+
+			resEntity = creatorResponse.getEntity();
+			if (creatorResponse.getStatusLine().getStatusCode() != 200) {
+				println("Error response when sending creator: "
+						+ creator + " : "
+						+ creatorResponse.getStatusLine().getReasonPhrase());
+				println("Details: " + EntityUtils.toString(resEntity));
+				throw new IOException("Non 200 response");
+			}
+		} finally {
+			EntityUtils.consumeQuietly(resEntity);
+		}
+	}
+
 
 	private static void addTags(CloseableHttpClient httpclient,
 			Resource resource, String id, String tagValues)

@@ -22,6 +22,7 @@ import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.http.HttpEntity;
@@ -238,7 +239,9 @@ public class PublishedResource implements Resource {
 	public long length() {
 		long size = 0;
 		if (!isDirectory()) {
-			size = Long.parseLong(resource.optString("Size")); //sead2 sends a number, 1.5 a string
+			size = Long.parseLong(resource.optString("Size")); // sead2 sends a
+																// number, 1.5 a
+																// string
 		}
 		return size;
 	}
@@ -330,8 +333,10 @@ public class PublishedResource implements Resource {
 
 					relationships.put(key, val);
 				} else {
-
-					changed.put(key, convert(key, val));
+					Object updated = convert(key, val);
+					if (updated != null) {
+						changed.put(key, updated);
+					}
 				}
 			} else if (md.get(key) instanceof JSONArray) {
 				JSONArray vals = md.getJSONArray(key);
@@ -346,13 +351,21 @@ public class PublishedResource implements Resource {
 								|| vals.getString(i).startsWith("urn:")) {
 							relationships.put(key, vals.getString(i));
 						} else {
-							newvals.put(convert(key, vals.getString(i)));
+							Object updated = convert(key, vals.getString(i));
+							if (updated != null) {
+								newvals.put(updated);
+							}
 						}
 					} else {
-						newvals.put(convert(key, vals.get(i)));
+						Object updated = convert(key, vals.get(i));
+						if (updated != null) {
+							newvals.put(updated);
+						}
 					}
 				}
-				changed.put(key, newvals);
+				if (newvals.length() != 0) {
+					changed.put(key, newvals);
+				}
 			} else {
 				changed.put(key, md.get(key));
 			}
@@ -394,6 +407,16 @@ public class PublishedResource implements Resource {
 				object = ((JSONObject) object).getString("@id");
 			}
 			break;
+		case "Contact":
+			if (object instanceof JSONObject) {
+				object = ((JSONObject) object).getString("@id");
+			}
+			break;
+		case "External Identifier":
+			if (object instanceof String) {
+				if (((String) object).startsWith("http://doi.org/10.5072/"))
+					object = null;
+			}
 		}
 		return object;
 	}
@@ -420,4 +443,32 @@ public class PublishedResource implements Resource {
 		}
 		return theAbstract;
 	}
+
+	/*
+	 * For datasets, we send the creators via the dataset api - before
+	 * processing metadata, so retrieve the value and then remove it so that
+	 * duplicate metadata is not sent.
+	 */
+	public void getAndRemoveCreator(List<String> creators) {
+
+		if (resource.has("Creator")) {
+			Object creatorField = resource.get("Creator");
+			if (creatorField instanceof JSONArray) {
+				for (int i = 0; i < ((JSONArray) creatorField).length(); i++) {
+					Object creator = ((JSONArray) creatorField).get(i);
+					if (creator instanceof JSONObject) {
+						creators.add(((String) convert("Creator", creator)));
+					} else {
+						creators.add((String) creator);
+					}
+				}
+			} else if (creatorField instanceof JSONObject) {
+				creators.add(((String) convert("Creator", creatorField)));
+			} else {
+				creators.add(((String) creatorField));
+			}
+			resource.remove("Creator");
+		}
+	}
+
 }
