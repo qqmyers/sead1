@@ -30,7 +30,14 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -75,18 +82,14 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
 public class MetadataAnalysis extends MediciToolBase {
 
-    private static long        max                = 9223372036854775807l;
-    private static long        skip               = 0l;
-    private static long        addCount           = 0l;
     private static long        processCount       = 0l;
-    private static boolean     collections        = false;
-
     static private Set<UriRef> terms              = new HashSet<UriRef>();
     static private Set<UriRef> relationships      = new HashSet<UriRef>();
 
     // Stats:
     private static long        totalMetadata      = 0l;
     private static long        totalRelationships = 0l;
+    private static long        totalTags          = 0l;
 
     private static PrintWriter csvPw              = null;
 
@@ -104,10 +107,12 @@ public class MetadataAnalysis extends MediciToolBase {
         getGoodList();
         checkTerms();
         checkRelationships();
+        checkTags();
         processCount = 0l;
         println("Metadata Analysis Complete: Final Stats");
         println("Total metadata entries: " + totalMetadata);
         println("Total relationship entries: " + totalRelationships);
+        println("Total tag entries: " + totalTags);
         flushLog();
         csvPw.flush();
         csvPw.close();
@@ -192,6 +197,44 @@ public class MetadataAnalysis extends MediciToolBase {
         }
     }
 
+    private static void checkTags() {
+
+        Unifier uf = new Unifier();
+        uf.addPattern("item", Resource.uriRef("http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag"), "tag");
+        uf.addPattern("tag", Resource.uriRef("http://www.holygoat.co.uk/owl/redwood/0.1/tags/name"), "name");
+        uf.setColumnNames("item", "name");
+
+        Map<String, Integer> tagCounts = new HashMap<String, Integer>();
+        try {
+            context.perform(uf);
+            println("Tags:");
+            for (Tuple<Resource> t : uf.getResult()) {
+                println(t.get(0).toString() + ":" + t.get(1).toString());
+                UriRef subject = (UriRef)t.get(0);
+                if (datasets.contains(subject)) {
+                    String tag = t.get(1).toString();
+                    printRow(subject.toString(), "http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag", tag);
+                    if (tagCounts.containsKey(tag)) {
+                        tagCounts.put(tag, tagCounts.get(tag) + 1);
+                    } else {
+                        tagCounts.put(tag, 1);
+                    }
+                }
+            }
+
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        println("\nTag Summary");
+        tagCounts = sortByValue(tagCounts);
+        for (String tag : tagCounts.keySet()) {
+            long count = tagCounts.get(tag);
+            println("Tag: " + tag + " : " + count + " entries");
+            totalTags += count;
+        }
+    }
+
     private static HashSet<UriRef> datasets = new HashSet<UriRef>();
 
     private static void getGoodList() throws OperatorException, IOException {
@@ -261,5 +304,20 @@ public class MetadataAnalysis extends MediciToolBase {
             s = "\"" + s + "\"";
         }
         return s;
+    }
+
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(map.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
+                return (o2.getValue()).compareTo(o1.getValue());
+            }
+        });
+
+        Map<K, V> result = new LinkedHashMap<K, V>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
     }
 }
