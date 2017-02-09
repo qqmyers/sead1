@@ -25,17 +25,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -46,17 +44,12 @@ import org.apache.http.util.EntityUtils;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.UriRef;
-import org.tupeloproject.rdf.terms.Cet;
-import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
-import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
-
 /* This tool records summary information about a space including:
- * config options,Content stats, Users, views/download stats, metadata and relationship terms/labels/definitions, 
+ * config options,Content stats, Users, views/download stats, metadata and relationship terms/labels/definitions, tags
  */
 
 public class SpaceSummary extends MediciToolBase {
@@ -73,6 +66,7 @@ public class SpaceSummary extends MediciToolBase {
                 println("Removing user names");
             }
         }
+        
         init("summary-log-", false); // No beansession needed
 
         Map<String, String> configOptionsMap = getConfigOptions();
@@ -92,8 +86,11 @@ public class SpaceSummary extends MediciToolBase {
             println(e.getMessage());
         }
         sumPw.println("Summary for the \"" + projectName + "\" Project Space");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        sumPw.println(LocalDateTime.now().format(formatter));
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        
+        sumPw.println(dateFormat.format(date));
         sumPw.println();
 
         println("Retrieving Config Options");
@@ -115,9 +112,14 @@ public class SpaceSummary extends MediciToolBase {
         sumPw.println();
         println("Retrieving Metadata Terms");
         printMetadata();
+
         sumPw.println();
         println("Retrieving Relationship Terms");
         printRelationships();
+
+        sumPw.println();
+        println("Retrieving Tags");
+        printTags();
 
         println("Summarization Complete");
 
@@ -187,7 +189,7 @@ public class SpaceSummary extends MediciToolBase {
                 stats = stats.substring(1, stats.length() - 1); // strip json {}
                 stats = stats.replace("\"", ""); // strip quotes
                 stats = stats.replace(":", ": "); // add space
-                stats = stats.replace(",", "\n"); // spearate lines
+                stats = stats.replace(",", "\r\n"); // separate lines
                 sumPw.println(stats);
             } else {
                 println("Unable to retrieve stats");
@@ -202,27 +204,6 @@ public class SpaceSummary extends MediciToolBase {
             sumPw.println("Unable to retrieve stats");
 
         }
-    }
-
-    private static HashMap<String, String> getConfigOptions() {
-        HashMap<String, String> options = new HashMap<String, String>();
-        Unifier uf = new Unifier();
-        uf.addPattern("entry", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/Configuration"));
-        uf.addPattern("entry", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/key"), "key");
-        uf.addPattern("entry", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value"), "val");
-
-        uf.setColumnNames("key", "val");
-
-        try {
-            context.perform(uf);
-            for (Tuple t : uf.getResult()) {
-                options.put(t.get(0).toString(), t.get(1).toString());
-            }
-        } catch (OperatorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return options;
     }
 
     private static void printConfigOptions(Map<String, String> options) {
@@ -242,7 +223,8 @@ public class SpaceSummary extends MediciToolBase {
         sumPw.println("ProjectURL: " + options.get(key));
         options.remove(key);
 
-        sumPw.println("\nAdditional Configuration Options:");
+        sumPw.println();
+        sumPw.println("Additional Configuration Options:");
         for (String key1 : options.keySet()) {
             sumPw.println(key1.substring("http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/".length()) + ": " + options.get(key1));
         }
@@ -284,7 +266,7 @@ public class SpaceSummary extends MediciToolBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        sumPw.println("\n");
+        sumPw.println();
         sumPw.println("By Dataset: ");
         int totalViews = 0;
         dataaccessesHashMap = sortByValue(dataaccessesHashMap);
@@ -292,12 +274,12 @@ public class SpaceSummary extends MediciToolBase {
             sumPw.println(dataaccessesHashMap.get(dataset) + "," + csvEscapeString(dsnamesHashMap.get(dataset)) + "," + csvEscapeString(dataset));
             totalViews += dataaccessesHashMap.get(dataset);
         }
-        sumPw.println("\nBy User: ");
+        sumPw.println("\r\nBy User: ");
         useraccessesHashMap = sortByValue(useraccessesHashMap);
         for (String user : useraccessesHashMap.keySet()) {
             sumPw.println(useraccessesHashMap.get(user) + "," + csvEscapeString(anonymizeIfNeeded(user)));
         }
-        sumPw.println("\nTotal Views: " + totalViews);
+        sumPw.println("\r\nTotal Views: " + totalViews);
     }
 
     private static void printDownloadStats() {
@@ -334,7 +316,7 @@ public class SpaceSummary extends MediciToolBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        sumPw.println("\n");
+        sumPw.println();
         sumPw.println("By Dataset: ");
         int totalDownloads = 0;
         dataaccessesHashMap = sortByValue(dataaccessesHashMap);
@@ -342,12 +324,12 @@ public class SpaceSummary extends MediciToolBase {
             sumPw.println(dataaccessesHashMap.get(dataset) + "," + csvEscapeString(dsnamesHashMap.get(dataset)) + "," + csvEscapeString(dataset));
             totalDownloads += dataaccessesHashMap.get(dataset);
         }
-        sumPw.println("\nBy User: ");
+        sumPw.println("\r\nBy User: ");
         useraccessesHashMap = sortByValue(useraccessesHashMap);
         for (String user : useraccessesHashMap.keySet()) {
             sumPw.println(useraccessesHashMap.get(user) + "," + csvEscapeString(anonymizeIfNeeded(user)));
         }
-        sumPw.println("\nTotal Downloads: " + totalDownloads);
+        sumPw.println("\r\nTotal Downloads: " + totalDownloads);
     }
 
     private static void printMetadata() {
@@ -406,6 +388,27 @@ public class SpaceSummary extends MediciToolBase {
                 }
                 sumPw.println();
                 sumPw.println(csvEscapeString(name) + "," + csvEscapeString(term) + "," + csvEscapeString(inv));
+            }
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private static void printTags() {
+        Map<String, String> tagsMap = new HashMap<String, String>();
+        Unifier uf = new Unifier();
+        uf.addPattern("tag", Resource.uriRef("http://www.holygoat.co.uk/owl/redwood/0.1/tags/name"), "name");
+
+        uf.setColumnNames("name");
+
+        sumPw.println("Tags:");
+
+        try {
+            context.perform(uf);
+            for (Tuple t : uf.getResult()) {
+                String name = t.get(0).toString();
+                sumPw.println(name);
             }
         } catch (OperatorException e) {
             // TODO Auto-generated catch block

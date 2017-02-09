@@ -26,6 +26,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -56,6 +58,7 @@ import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -95,9 +98,18 @@ public class MetadataAnalysis extends MediciToolBase {
 
     public static void main(String[] args) throws Exception {
 
-        init("metadata2-log-", false); // No beansession needed
+        File log = new File("MetadataSummary.txt");
+        init(log, false); // No
+                          // beansession
+                          // needed
 
-        File csvFile = new File("metadata2-log-" + System.currentTimeMillis() + ".csv");
+        Map<String, String> configOptionsMap = getConfigOptions();
+        String projectName = configOptionsMap.get("http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/ProjectName");
+        println("Metadata Analysis for the \"" + projectName + "\" Project Space");
+
+        String projectFileName = projectName.replace(" ", "_");
+
+        File csvFile = new File("MetadataAnalysis-" + projectFileName + "-" + System.currentTimeMillis() + ".csv");
         try {
             csvPw = new PrintWriter(new FileWriter(csvFile));
         } catch (Exception e) {
@@ -113,9 +125,10 @@ public class MetadataAnalysis extends MediciToolBase {
         println("Total metadata entries: " + totalMetadata);
         println("Total relationship entries: " + totalRelationships);
         println("Total tag entries: " + totalTags);
-        flushLog();
+        closeLog();
         csvPw.flush();
         csvPw.close();
+        log.renameTo(new File("MetadataSummary-" + projectFileName + "-" + System.currentTimeMillis() + ".txt"));
     }
 
     private static void checkRelationships() {
@@ -209,8 +222,8 @@ public class MetadataAnalysis extends MediciToolBase {
             context.perform(uf);
             println("Tags:");
             for (Tuple<Resource> t : uf.getResult()) {
-                println(t.get(0).toString() + ":" + t.get(1).toString());
-                UriRef subject = (UriRef)t.get(0);
+
+                UriRef subject = (UriRef) t.get(0);
                 if (datasets.contains(subject)) {
                     String tag = t.get(1).toString();
                     printRow(subject.toString(), "http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag", tag);

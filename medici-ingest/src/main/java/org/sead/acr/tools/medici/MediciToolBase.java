@@ -1,6 +1,5 @@
 package org.sead.acr.tools.medici;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -18,10 +18,14 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.mysql.MysqlContext;
 import org.tupeloproject.mysql.NewMysqlContext;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Tuple;
 
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
@@ -33,18 +37,19 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  */
 public class MediciToolBase {
 
-    private static Log           log      = LogFactory.getLog(FileCollectionIngester.class);
-    protected static BeanSession beansession;
-    protected static MimeMap     mimemap;
-    protected static PersonBean  creator;
+    private static Log                log      = LogFactory.getLog(FileCollectionIngester.class);
+    protected static BeanSession      beansession;
+    protected static MimeMap          mimemap;
+    protected static PersonBean       creator;
 
-    protected static Context     context;
+    protected static Context          context;
 
-    private static PrintWriter   pw       = null;
+    private static PrintWriter        pw       = null;
 
-    protected static boolean     listonly = false;
+    protected static boolean          listonly = false;
 
-    protected static final Properties props = new Properties();
+    protected static final Properties props    = new Properties();
+
     protected static void println(String s) {
         System.out.println(s);
         if (pw != null)
@@ -53,12 +58,16 @@ public class MediciToolBase {
     }
 
     protected static void init(String prefix, boolean useBeanSession) throws IOException, ClassNotFoundException, OperatorException {
+        File outputFile = new File(prefix + System.currentTimeMillis() + ".txt");
+        init(outputFile, useBeanSession);
+    }
+
+    protected static void init(File outputFile, boolean useBeanSession) throws IOException, ClassNotFoundException, OperatorException {
 
         // load properties
-        
+
         props.load(new FileInputStream("server.properties"));
 
-        File outputFile = new File(prefix + System.currentTimeMillis() + ".txt");
         try {
             pw = new PrintWriter(new FileWriter(outputFile));
         } catch (Exception e) {
@@ -84,6 +93,14 @@ public class MediciToolBase {
     protected static void flushLog() {
         if (pw != null) {
             pw.flush();
+        }
+
+    }
+    
+    protected static void closeLog() {
+        if (pw != null) {
+            pw.flush();
+            pw.close();
         }
 
     }
@@ -199,5 +216,26 @@ public class MediciToolBase {
                 context = csc;
             }
         }
+    }
+
+    protected static HashMap<String, String> getConfigOptions() {
+        HashMap<String, String> options = new HashMap<String, String>();
+        Unifier uf = new Unifier();
+        uf.addPattern("entry", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/Configuration"));
+        uf.addPattern("entry", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/key"), "key");
+        uf.addPattern("entry", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value"), "val");
+
+        uf.setColumnNames("key", "val");
+
+        try {
+            context.perform(uf);
+            for (Tuple t : uf.getResult()) {
+                options.put(t.get(0).toString(), t.get(1).toString());
+            }
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return options;
     }
 }
