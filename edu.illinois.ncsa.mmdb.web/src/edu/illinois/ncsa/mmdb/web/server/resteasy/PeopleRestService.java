@@ -11,6 +11,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -49,7 +51,13 @@ public class PeopleRestService {
     public Response getPeopleAsJSON() {
         try {
             URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            SSLContext sc = SSLContext.getInstance("TLSv1.2");
+            sc.init(null, null, null);
+
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            conn.setSSLSocketFactory(sc.getSocketFactory());
+
             conn.setReadTimeout(10000);
             conn.addRequestProperty("Accept", "application/json");
 
@@ -68,6 +76,8 @@ public class PeopleRestService {
             }
         } catch (IOException e) {
             log.error("Error retrieving /people from c3pr: ", e);
+        } catch (Exception e) {
+            log.error("Error retrieving /people from c3pr: ", e);
         }
         return Response.status(404).build();
     }
@@ -84,7 +94,11 @@ public class PeopleRestService {
 
         try {
             URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            SSLContext sc = SSLContext.getInstance("TLSv1.2");
+            sc.init(null, null, null);
+
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            conn.setSSLSocketFactory(sc.getSocketFactory());
             conn.setReadTimeout(10000);
             conn.addRequestProperty("Accept", "application/json");
 
@@ -103,6 +117,8 @@ public class PeopleRestService {
             }
         } catch (IOException e) {
             log.error("Error retrieving /people/" + id + " from c3pr: ", e);
+        } catch (Exception e) {
+            log.error("Error retrieving /people/" + id + " from c3pr: ", e);
         }
         return Response.status(404).build();
     }
@@ -118,7 +134,10 @@ public class PeopleRestService {
 
             try {
                 URL url2 = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people");
-                HttpURLConnection post = (HttpURLConnection) url2.openConnection();
+                SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                sc.init(null, null, null);
+                HttpsURLConnection post = (HttpsURLConnection) url2.openConnection();
+                post.setSSLSocketFactory(sc.getSocketFactory());
                 post.setReadTimeout(15000);
                 post.setConnectTimeout(15000);
                 post.setRequestMethod("POST");
@@ -146,6 +165,8 @@ public class PeopleRestService {
                 }
             } catch (IOException io) {
                 log.warn(io.getLocalizedMessage());
+            } catch (Exception e) {
+                log.warn(e.getLocalizedMessage());
             }
         }
         return person;
@@ -155,7 +176,11 @@ public class PeopleRestService {
     private static JSONObject getPersonJSONForID(String id) {
         try {
             URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            SSLContext sc = SSLContext.getInstance("TLSv1.2");
+            sc.init(null, null, null);
+
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            conn.setSSLSocketFactory(sc.getSocketFactory());
             conn.setReadTimeout(10000);
             conn.addRequestProperty("Accept", "application/json");
 
@@ -168,6 +193,8 @@ public class PeopleRestService {
         } catch (IOException e) {
             log.error("Error retrieving /people/" + id + " from c3pr: ", e);
         } catch (JSONException e) {
+            log.warn(e);
+        } catch (Exception e) {
             log.warn(e);
         }
         return null;

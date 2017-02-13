@@ -227,7 +227,6 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         try {
 
                             SSLContext sc = SSLContext.getInstance("TLSv1.2");
-                            // Init the SSLContext with a TrustManager[] and SecureRandom()
                             sc.init(null, null, null);
 
                             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();

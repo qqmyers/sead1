@@ -41,8 +41,10 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -128,7 +130,13 @@ public class RevokePublicationRequestHandler implements ActionHandler<RevokePubl
                         String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
                         URL url = new URL(server + "/researchobjects/" + aggId);
                         log.debug("URL = " + url.toString());
-                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                        SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                        sc.init(null, null, null);
+
+                        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+
+                        conn.setSSLSocketFactory(sc.getSocketFactory());
 
                         // send post
 
