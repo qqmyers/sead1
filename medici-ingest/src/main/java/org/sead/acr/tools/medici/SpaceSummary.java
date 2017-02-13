@@ -66,7 +66,7 @@ public class SpaceSummary extends MediciToolBase {
                 println("Removing user names");
             }
         }
-        
+
         init("summary-log-", false); // No beansession needed
 
         Map<String, String> configOptionsMap = getConfigOptions();
@@ -89,7 +89,7 @@ public class SpaceSummary extends MediciToolBase {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
-        
+
         sumPw.println(dateFormat.format(date));
         sumPw.println();
 
@@ -131,6 +131,24 @@ public class SpaceSummary extends MediciToolBase {
     private static void printUsers() {
         sumPw.println("Users:");
 
+        HashMap<String, String> roles = new HashMap<String, String>();
+        Unifier roleUf = new Unifier();
+        roleUf.addPattern("role", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/role/Role"));
+        roleUf.addPattern("role", Rdfs.LABEL, "name");
+        roleUf.setColumnNames("role", "name");
+        sumPw.println("Defined Roles:");
+        try {
+            context.perform(roleUf);
+
+            for (Tuple t : roleUf.getResult()) {
+                roles.put(t.get(0).toString(), t.get(1).toString());
+                sumPw.println(t.get(1).toString());
+            }
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        sumPw.println();
         HashMap<String, String> users = new HashMap<String, String>();
         Unifier uf = new Unifier();
         uf.addPattern("person", Rdf.TYPE, Resource.uriRef("http://xmlns.com/foaf/0.1/Person"));
@@ -154,7 +172,7 @@ public class SpaceSummary extends MediciToolBase {
                 }
                 sumPw.println("\tEmail: " + anonymizeIfNeeded(t.get(2).toString()));
                 String role = t.get(3).toString();
-                role = role.substring(role.lastIndexOf("/") + 1);
+                role = roles.get(role);
                 sumPw.println("\tRole: " + role);
                 if (t.get(4) != null) {
                     sumPw.println("\tLastLogin: " + t.get(4).toString());
