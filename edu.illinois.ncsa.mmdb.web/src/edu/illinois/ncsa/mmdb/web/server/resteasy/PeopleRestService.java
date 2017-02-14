@@ -50,14 +50,15 @@ public class PeopleRestService {
     @Produces("application/json")
     public Response getPeopleAsJSON() {
         try {
-            URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people");
+            String c3prBaseURL = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
+            URL url = new URL(c3prBaseURL + "/people");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            SSLContext sc = SSLContext.getInstance("TLSv1.2");
-            sc.init(null, null, null);
-
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            conn.setSSLSocketFactory(sc.getSocketFactory());
-
+            if (c3prBaseURL.startsWith("https")) {
+                SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                sc.init(null, null, null);
+                ((HttpsURLConnection) conn).setSSLSocketFactory(sc.getSocketFactory());
+            }
             conn.setReadTimeout(10000);
             conn.addRequestProperty("Accept", "application/json");
 
@@ -93,12 +94,14 @@ public class PeopleRestService {
     public Response getPersonAsJSON(@PathParam("id") @Encoded String id) {
 
         try {
-            URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
-            SSLContext sc = SSLContext.getInstance("TLSv1.2");
-            sc.init(null, null, null);
-
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            conn.setSSLSocketFactory(sc.getSocketFactory());
+            String c3prBaseURL = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
+            URL url = new URL(c3prBaseURL + "/people/" + id);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            if (c3prBaseURL.startsWith("https")) {
+                SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                sc.init(null, null, null);
+                ((HttpsURLConnection) conn).setSSLSocketFactory(sc.getSocketFactory());
+            }
             conn.setReadTimeout(10000);
             conn.addRequestProperty("Accept", "application/json");
 
@@ -133,11 +136,14 @@ public class PeopleRestService {
             //Never fail! - if the person's identifier is valid but not in pdt, request that it be added
 
             try {
-                URL url2 = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people");
-                SSLContext sc = SSLContext.getInstance("TLSv1.2");
-                sc.init(null, null, null);
-                HttpsURLConnection post = (HttpsURLConnection) url2.openConnection();
-                post.setSSLSocketFactory(sc.getSocketFactory());
+                String c3prBaseURL = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
+                URL url2 = new URL(c3prBaseURL + "/people");
+                HttpURLConnection post = (HttpURLConnection) url2.openConnection();
+                if (c3prBaseURL.startsWith("https")) {
+                    SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                    sc.init(null, null, null);
+                    ((HttpsURLConnection) post).setSSLSocketFactory(sc.getSocketFactory());
+                }
                 post.setReadTimeout(15000);
                 post.setConnectTimeout(15000);
                 post.setRequestMethod("POST");
@@ -175,12 +181,15 @@ public class PeopleRestService {
 
     private static JSONObject getPersonJSONForID(String id) {
         try {
-            URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
-            SSLContext sc = SSLContext.getInstance("TLSv1.2");
-            sc.init(null, null, null);
+            String c3prBaseURL = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
+            URL url = new URL(c3prBaseURL + "/people/" + id);
 
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            conn.setSSLSocketFactory(sc.getSocketFactory());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            if (c3prBaseURL.startsWith("https")) {
+                SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                sc.init(null, null, null);
+                ((HttpsURLConnection) conn).setSSLSocketFactory(sc.getSocketFactory());
+            }
             conn.setReadTimeout(10000);
             conn.addRequestProperty("Accept", "application/json");
 

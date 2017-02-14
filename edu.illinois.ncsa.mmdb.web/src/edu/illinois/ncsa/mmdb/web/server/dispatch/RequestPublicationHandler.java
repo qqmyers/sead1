@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -225,13 +226,13 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         URL url = new URL(server + "/researchobjects");
                         log.debug("URL = " + url.toString());
                         try {
+                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                            SSLContext sc = SSLContext.getInstance("TLSv1.2");
-                            sc.init(null, null, null);
-
-                            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-
-                            conn.setSSLSocketFactory(sc.getSocketFactory());
+                            if (server.startsWith("https")) {
+                                SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                                sc.init(null, null, null);
+                                ((HttpsURLConnection) conn).setSSLSocketFactory(sc.getSocketFactory());
+                            }
 
                             // send post
                             conn.setDoOutput(true);
