@@ -52,7 +52,7 @@
 
 	<target name="compile" description="compiles Java source files to bytecode">
 	    <mkdir dir="bin"></mkdir>
-		<javac srcdir="src" includes="**" encoding="utf-8" destdir="bin" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
+		<javac srcdir="src" includes="**" encoding="utf-8" destdir="bin" source="1.7" target="1.7" deprecation="${deprecation}" debug="${debug}">
 			<classpath refid="classpath" />
 		</javac>
 	</target>

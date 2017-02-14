@@ -3,6 +3,7 @@ package org.mitre.dsmiley.httpproxy;
 import java.io.IOException;
 import java.net.URI;
 
+import javax.net.ssl.SSLContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,12 +18,18 @@ import org.sead.acr.common.MediciProxy;
 import org.sead.acr.common.utilities.PropertiesLoader;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 import javax.servlet.http.HttpServlet;
 
@@ -42,6 +49,7 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 		return "A proxy servlet for an ACR Geoserver, built using a proxy servlet by David Smiley, dsmiley@mitre.org";
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void init() throws ServletException {
 
@@ -87,16 +95,43 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 		if (doLog) {
 			log(targetUri);
 		}
-		HttpParams hcParams = new BasicHttpParams();
-		readConfigParam(hcParams, ClientPNames.HANDLE_REDIRECTS, Boolean.class);
-		proxyClient = createHttpClient(hcParams);
 
-		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		proxyClient = createHttpClient(buildRequestConfig());
 
-		credsProvider.setCredentials(new AuthScope(targetUriObj.getHost(),
-				targetUriObj.getPort()), new UsernamePasswordCredentials(_user,
-				_password));
-		((DefaultHttpClient) proxyClient).setCredentialsProvider(credsProvider);
+	}
+
+	protected RequestConfig buildRequestConfig() {
+		return RequestConfig
+				.custom()
+				.setRedirectsEnabled(
+						Boolean.valueOf(getConfigParam(ClientPNames.HANDLE_REDIRECTS)))
+				.setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+	}
+
+	protected HttpClient createHttpClient(RequestConfig requestConfig) {
+		try {
+			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+
+			credsProvider.setCredentials(new AuthScope(targetUriObj.getHost(),
+					targetUriObj.getPort()), new UsernamePasswordCredentials(
+					_user, _password));
+
+			SSLContext sslContext = SSLContexts.custom().useTLS().build();
+
+			SSLConnectionSocketFactory f = new SSLConnectionSocketFactory(
+					sslContext,
+					new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" },
+					null,
+					SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+
+			return HttpClients.custom().setSSLSocketFactory(f)
+					.setDefaultRequestConfig(requestConfig)
+					.setDefaultCredentialsProvider(credsProvider).build();
+
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	protected void service(HttpServletRequest servletRequest,
@@ -105,22 +140,23 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 		boolean allow = false;
 		HttpSession session = servletRequest.getSession(false);
 		if (session != null) {
-			if(doLog) {
+			if (doLog) {
 				log("Found Session: " + session.getId());
 			}
 			String remoteAllowed = (String) session
 					.getAttribute(REMOTE_ALLOWED);
-			if(doLog) {
+			if (doLog) {
 				log("Remote Allowed: x" + remoteAllowed + "x");
 			}
-			if(doLog) {
-				MediciProxy mediciProxy = (MediciProxy) session.getAttribute("proxy");
-				if(mediciProxy!=null) {
+			if (doLog) {
+				MediciProxy mediciProxy = (MediciProxy) session
+						.getAttribute("proxy");
+				if (mediciProxy != null) {
 					log("MP found: anon =  " + mediciProxy.isAnonymous());
-					allow=true;
+					allow = true;
 				}
 			}
-			
+
 			if ((remoteAllowed != null) && (remoteAllowed.equals("true"))) {
 				allow = true;
 			}

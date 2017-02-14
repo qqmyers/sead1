@@ -24,12 +24,18 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.AbortableHttpRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIUtils;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
@@ -39,11 +45,13 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
+import javax.net.ssl.SSLContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -102,7 +110,7 @@ public class ProxyServlet extends HttpServlet {
   protected HttpHost targetHost;//URIUtils.extractHost(targetUriObj);
 
   protected HttpClient proxyClient;
-
+ 
   @Override
   public String getServletInfo() {
     return "A proxy servlet by David Smiley, dsmiley@apache.org";
@@ -139,12 +147,17 @@ public class ProxyServlet extends HttpServlet {
 
     initTarget();//sets target*
 
-    HttpParams hcParams = new BasicHttpParams();
-    hcParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
-    readConfigParam(hcParams, ClientPNames.HANDLE_REDIRECTS, Boolean.class);
-    proxyClient = createHttpClient(hcParams);
+
+    proxyClient = createHttpClient(buildRequestConfig());
   }
 
+  protected RequestConfig buildRequestConfig() {
+	      return RequestConfig.custom()
+	               .setRedirectsEnabled(false)
+	               .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+	               .build();
+	     }
+  
   protected void initTarget() throws ServletException {
     targetUri = getConfigParam(P_TARGET_URI);
     if (targetUri == null)
@@ -166,21 +179,28 @@ public class ProxyServlet extends HttpServlet {
    * <pre>new DefaultHttpClient(new ThreadSafeClientConnManager(),hcParams)</pre>
    * SystemDefaultHttpClient uses PoolingClientConnectionManager. In any case, it should be thread-safe. */
   @SuppressWarnings({"unchecked", "deprecation"})
-  protected HttpClient createHttpClient(HttpParams hcParams) {
+  protected HttpClient createHttpClient(RequestConfig requestConfig) {
     try {
-      //as of HttpComponents v4.2, this class is better since it uses System
-      // Properties:
-      Class clientClazz = Class.forName("org.apache.http.impl.client.SystemDefaultHttpClient");
-      Constructor constructor = clientClazz.getConstructor(HttpParams.class);
-      return (HttpClient) constructor.newInstance(hcParams);
-    } catch (ClassNotFoundException e) {
-      //no problem; use v4.1 below
+      
+      SSLContext sslContext = SSLContexts.custom()
+    		    .useTLS()
+    		    .build();
+
+    		SSLConnectionSocketFactory f = new SSLConnectionSocketFactory(
+    		    sslContext,
+    		    new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"},   
+    		    null,
+    		    SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+
+    		return HttpClients.custom()
+    		    .setSSLSocketFactory(f)
+    		    .setDefaultRequestConfig(requestConfig)
+    		    .build();
+    		
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
 
-    //Fallback on using older client:
-    return new DefaultHttpClient(new ThreadSafeClientConnManager(), hcParams);
   }
 
   /** The http client used.
