@@ -61,7 +61,7 @@
 	<target name="compile" depends="resources"
 		description="compiles Java source files to bytecode">
 		<javac srcdir="src" includes="**" encoding="utf-8"
-			destdir="WebContent/WEB-INF/classes" source="1.5" target="1.5"
+			destdir="WebContent/WEB-INF/classes" source="1.7" target="1.7"
 			deprecation="${deprecation}" debug="${debug}">
 			<classpath refid="classpath" />
 			<!--<compilerarg value="-Xlint:unchecked"/> -->
