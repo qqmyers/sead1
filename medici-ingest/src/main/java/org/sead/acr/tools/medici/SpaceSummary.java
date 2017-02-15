@@ -44,12 +44,13 @@ import org.apache.http.util.EntityUtils;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
 /* This tool records summary information about a space including:
- * config options,Content stats, Users, views/download stats, metadata and relationship terms/labels/definitions, tags
+ * config options,Content stats, Users, views/download stats, metadata and relationship terms/labels/definitions, tags, comments
  */
 
 public class SpaceSummary extends MediciToolBase {
@@ -120,6 +121,10 @@ public class SpaceSummary extends MediciToolBase {
         sumPw.println();
         println("Retrieving Tags");
         printTags();
+        
+        sumPw.println();
+        println("Retrieving Comments");
+        printComments();
 
         println("Summarization Complete");
 
@@ -164,25 +169,30 @@ public class SpaceSummary extends MediciToolBase {
         try {
             context.perform(uf);
             int numUsers = 1;
+            sumPw.println("UserID,Name,Email,Role,LastLoginDate,PersistentID, AccessEndedDate");
             for (Tuple t : uf.getResult()) {
+                StringBuilder csvStringBuilder = new StringBuilder();
                 if (anonymize) {
-                    sumPw.println("User " + numUsers + ":");
+                    csvStringBuilder.append(numUsers);
                 } else {
-                    sumPw.println(t.get(1).toString() + ":");
+                    csvStringBuilder.append(csvEscapeString(t.get(1).toString()));
                 }
-                sumPw.println("\tEmail: " + anonymizeIfNeeded(t.get(2).toString()));
+                csvStringBuilder.append(",");
+                csvStringBuilder.append(csvEscapeString(anonymizeIfNeeded(t.get(2).toString()))).append(",");
                 String role = t.get(3).toString();
                 role = roles.get(role);
-                sumPw.println("\tRole: " + role);
+                csvStringBuilder.append(csvEscapeString(role)).append(",");
                 if (t.get(4) != null) {
-                    sumPw.println("\tLastLogin: " + t.get(4).toString());
+                    csvStringBuilder.append(csvEscapeString(t.get(4).toString())).append(",");
                 }
                 if (t.get(5) != null) {
-                    sumPw.println("\tPID: " + t.get(5).toString());
+                    csvStringBuilder.append(csvEscapeString(t.get(5).toString())).append(",");
                 }
                 if (t.get(6) != null) {
-                    sumPw.println("\tAccessEnded: " + t.get(6).toString());
+                    csvStringBuilder.append(csvEscapeString(t.get(6).toString()));
                 }
+                sumPw.println(csvStringBuilder.toString());
+                numUsers++;
             }
 
         } catch (OperatorException e) {
@@ -428,6 +438,62 @@ public class SpaceSummary extends MediciToolBase {
                 String name = t.get(0).toString();
                 sumPw.println(name);
             }
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+
+    private static void printComments() {
+
+        Unifier uf = new Unifier();
+        uf.addPattern("data", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/annotation/hasAnnotation"), "anno");
+        uf.addPattern("data", Rdfs.LABEL, "name");
+
+        uf.addPattern("anno", Dc.CREATOR, "creator");
+        uf.setColumnNames("data", "name", "creator");
+
+        sumPw.println("Comment Summary:");
+        Map<String, Integer> datacommentsHashMap = new HashMap<String, Integer>();
+        Map<String, Integer> usercommentsHashMap = new HashMap<String, Integer>();
+        Map<String, String> dsnamesHashMap = new HashMap<String, String>();
+
+        
+        try {
+            context.perform(uf);
+            for (Tuple t : uf.getResult()) {
+                String item = t.get(0).toString();
+                String name = t.get(1).toString();
+                String creator = t.get(2).toString();
+                dsnamesHashMap.put(item,  name);
+                if (datacommentsHashMap.containsKey(item)) {
+                    datacommentsHashMap.put(item, datacommentsHashMap.get(item) + 1);
+                } else {
+                    datacommentsHashMap.put(item, 1);
+                }
+                if (usercommentsHashMap.containsKey(creator)) {
+                    usercommentsHashMap.put(creator, usercommentsHashMap.get(creator) + 1);
+                } else {
+                    usercommentsHashMap.put(creator, 1);
+                }
+
+            }
+            sumPw.println();
+            sumPw.println("By Dataset: ");
+            int totalComments = 0;
+            datacommentsHashMap = sortByValue(datacommentsHashMap);
+            for (String dataset : datacommentsHashMap.keySet()) {
+                sumPw.println(datacommentsHashMap.get(dataset) + "," + csvEscapeString(dsnamesHashMap.get(dataset)) + "," + csvEscapeString(dataset));
+                totalComments += datacommentsHashMap.get(dataset);
+            }
+            sumPw.println("\r\nBy User: ");
+            usercommentsHashMap = sortByValue(usercommentsHashMap);
+            for (String user : usercommentsHashMap.keySet()) {
+                sumPw.println(usercommentsHashMap.get(user) + "," + csvEscapeString(anonymizeIfNeeded(user)));
+            }
+            sumPw.println("\r\nTotal Comments: " + totalComments);
+
         } catch (OperatorException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

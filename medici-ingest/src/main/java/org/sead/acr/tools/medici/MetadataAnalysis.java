@@ -93,6 +93,7 @@ public class MetadataAnalysis extends MediciToolBase {
     private static long        totalMetadata      = 0l;
     private static long        totalRelationships = 0l;
     private static long        totalTags          = 0l;
+    private static long        totalComments      = 0l;
 
     private static PrintWriter csvPw              = null;
 
@@ -117,14 +118,21 @@ public class MetadataAnalysis extends MediciToolBase {
         }
         println("Starting Metadata Analysis: ");
         getGoodList();
+        println("");
         checkTerms();
+        println("");
         checkRelationships();
+        println("");
         checkTags();
+        println("");
+        checkComments();
+        println("");
         processCount = 0l;
         println("Metadata Analysis Complete: Final Stats");
         println("Total metadata entries: " + totalMetadata);
         println("Total relationship entries: " + totalRelationships);
         println("Total tag entries: " + totalTags);
+        println("Total comment entries: " + totalComments);
         closeLog();
         csvPw.flush();
         csvPw.close();
@@ -148,7 +156,7 @@ public class MetadataAnalysis extends MediciToolBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        println("\n\n");
+        println("\n");
 
         for (UriRef t : relationships) {
             long relCount = getTriples(t);
@@ -201,7 +209,7 @@ public class MetadataAnalysis extends MediciToolBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        println("\n\n");
+        println("\n");
 
         for (UriRef t : terms) {
             long termCount = getTriples(t);
@@ -247,6 +255,41 @@ public class MetadataAnalysis extends MediciToolBase {
             totalTags += count;
         }
     }
+    
+    private static void checkComments() {
+
+        Unifier uf = new Unifier();
+        uf.addPattern("data", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/annotation/hasAnnotation"), "anno");
+        uf.addPattern("anno", Dc.DATE, "date");
+        uf.addPattern("anno", Dc.DESCRIPTION, "desc");
+        uf.addPattern("anno", Dc.CREATOR, "creator");
+        uf.addPattern("anno", Dc.TITLE, "title", true);
+        uf.setColumnNames("data", "date", "desc", "creator", "title");
+
+        csvPw.println();
+        
+        try {
+            context.perform(uf);
+            for (Tuple t : uf.getResult()) {
+                totalComments++;
+                StringBuilder csvString = new StringBuilder();
+                csvString.append(csvEscapeString(t.get(0).toString())).append(",");
+                csvString.append(csvEscapeString(t.get(1).toString())).append(",");
+                csvString.append(csvEscapeString(t.get(2).toString())).append(",");
+                csvString.append(csvEscapeString(t.get(3).toString()));
+                if(t.get(4)!=null) {
+                    if(t.get(4).toString().trim().length()!=0) {
+                      csvString.append(",").append(csvEscapeString(t.get(4).toString()));
+                    }
+                }
+                csvPw.println(csvString.toString());
+            }
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
 
     private static HashSet<UriRef> datasets = new HashSet<UriRef>();
 
