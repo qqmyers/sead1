@@ -206,8 +206,9 @@ public class SpaceSummary extends MediciToolBase {
         sumPw.println("Content Statistics:");
 
         // HttpGet httpget = new
-        // HttpGet("https://localhost/acr/resteasy/sys/info");
-        HttpGet httpget = new HttpGet("http://localhost:8080/medici/resteasy/sys/info");
+        HttpGet httpget = new HttpGet(props.getProperty("domain") + "/resteasy/sys/info");
+        //Local testing:
+        //HttpGet httpget = new HttpGet("http://localhost:8080/medici/resteasy/sys/info");
 
         CloseableHttpResponse getResponse;
         try {
