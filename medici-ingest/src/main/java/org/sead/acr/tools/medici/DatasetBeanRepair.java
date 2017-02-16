@@ -70,53 +70,57 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 public class DatasetBeanRepair extends MediciToolBase {
 
-    private static long        max         = 9223372036854775807l;
-    private static long        skip        = 0l;
-    private static long        addCount    = 0l;
-    private static long        removeCount = 0l;
-    
+    private static long max         = 9223372036854775807l;
+    private static long skip        = 0l;
+    private static long addCount    = 0l;
+    private static long removeCount = 0l;
+
     public static void main(String[] args) throws Exception {
 
-        init("datasetbean-repair-log-", false); //No beansession needed
-        
+        init("datasetbean-repair-log-", false); // No beansession needed
 
-    repairBeans();
-    flushLog();
+        repairBeans();
+        flushLog();
     }
 
     private static void repairBeans() throws OperatorException, IOException {
 
         Unifier uf = new Unifier();
-        uf.addPattern("db",  Rdf.TYPE, Cet.DATASET);
+        uf.addPattern("db", Rdf.TYPE, Cet.DATASET);
         uf.addPattern("db", Dc.IDENTIFIER, "id", true);
         uf.setColumnNames("db", "id");
         try {
-        context.perform(uf);
-        TripleWriter tw = new TripleWriter();
-        for(Tuple<Resource> tu: uf.getResult()) {
-            if(tu.get(1) == null) {
-                println("Updating: " + tu.get(0).toString());
+            context.perform(uf);
+            TripleWriter tw = new TripleWriter();
+            int count = 0;
+            for (Tuple<Resource> tu : uf.getResult()) {
+                if (tu.get(1) == null) {
+                    println("Updating: " + tu.get(0).toString());
 
-                tw.add(tu.get(0), Dc.IDENTIFIER, tu.get(0));
-                tw.add(tu.get(0), Rdf.TYPE, Beans.STORAGE_TYPE_BEAN_ENTRY);
-                tw.add(tu.get(0), Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
-                        Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
-                tw.add(tu.get(0), Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
-                        Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
+                    tw.add(tu.get(0), Dc.IDENTIFIER, tu.get(0));
+                    tw.add(tu.get(0), Rdf.TYPE, Beans.STORAGE_TYPE_BEAN_ENTRY);
+                    tw.add(tu.get(0), Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME, Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
+                    tw.add(tu.get(0), Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT, Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
+                    count++;
+                } else if (tu.get(1).isUri()) {
+                    println("Updating uri id to string: " + tu.get(0).toString());
+                    tw.remove(tu.get(0), Dc.IDENTIFIER, tu.get(1));
+                    tw.add(tu.get(0), Dc.IDENTIFIER, Resource.literal(tu.get(0).toString()));
+                    count++;
+                }
+
+                if (count % 100 == 0) {
+                    println("Writing 100 updates");
+                    context.perform(tw);
+                    tw = new TripleWriter();
+                }
             }
-            else if(tu.get(1).isUri() ) {
-                println("Updating uri id to string: " + tu.get(0).toString());                
-                tw.remove(tu.get(0), Dc.IDENTIFIER, tu.get(1));
-                tw.add(tu.get(0), Dc.IDENTIFIER, Resource.literal(tu.get(0).toString()));
-            }
-        }
-                context.perform(tw);
-            } catch (Exception e) {
-                println(e.getMessage());
-                println(e.getStackTrace().toString());
-                flushLog();
-                System.exit(0);
-            }
+            context.perform(tw);
+        } catch (Exception e) {
+            println(e.getMessage());
+            println(e.getStackTrace().toString());
+            flushLog();
+            System.exit(0);
         }
     }
-
+}
