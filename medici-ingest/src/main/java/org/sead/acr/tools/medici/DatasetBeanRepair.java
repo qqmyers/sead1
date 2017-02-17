@@ -109,7 +109,7 @@ public class DatasetBeanRepair extends MediciToolBase {
                     count++;
                 }
 
-                if (count % 100 == 0) {
+                if ((count % 100 == 0)&&(count!=0)) {
                     println("Writing 100 updates");
                     context.perform(tw);
                     tw = new TripleWriter();
