@@ -437,9 +437,9 @@ public class SEADUploader {
 			println("              Does not yet exist on server.");
 		}
 		if (path != null) {
-			path += "/" + dir.getName();
+			path += "/" + dir.getName().trim();
 		} else {
-			path = "/" + dir.getName();
+			path = "/" + dir.getName().trim();
 		}
 
 		boolean created = false;
@@ -855,7 +855,7 @@ public class SEADUploader {
 					+ sead2datasetId + "/newFolder");
 
 			JSONObject jo = new JSONObject();
-			jo.put("name", dir.getName());
+			jo.put("name", dir.getName().trim());
 			jo.put("parentId", parentId);
 			jo.put("parentType", ((parentId == sead2datasetId) ? "dataset"
 					: "folder"));
@@ -887,7 +887,7 @@ public class SEADUploader {
 					}
 					folderPath = folderPath.substring(folderPath.substring(1)
 							.indexOf("/") + 1);
-
+					
 					HttpGet httpget = new HttpGet(server + "/api/datasets/"
 							+ sead2datasetId + "/folders");
 
@@ -975,7 +975,7 @@ public class SEADUploader {
 			HttpPost httppost = new HttpPost(server
 					+ "/api/datasets/createempty");
 			JSONObject jo = new JSONObject();
-			jo.put("name", dir.getName());
+			jo.put("name", dir.getName().trim());
 			if (importRO) {
 				String abs = ((PublishedResource) dir).getAndRemoveAbstract();
 				if (abs != null) {
@@ -1813,10 +1813,11 @@ public class SEADUploader {
 
 		for (String key : keys) {
 			try {
-
-				JSONObject singleContent = new JSONObject().put(key,
+				String safeKey = key.replace(".", "_").replace("$", "_").replace("/", "_"); //Clowder/MongoDB don't allow keys with .$/ chars
+						
+				JSONObject singleContent = new JSONObject().put(safeKey,
 						content.get(key));
-				JSONObject singleContext = new JSONObject().put(key,
+				JSONObject singleContext = new JSONObject().put(safeKey,
 						context.get(key));
 				// Geolocation stays together with lat and long to mirror
 				// how the Clowder GUI works
@@ -1828,7 +1829,7 @@ public class SEADUploader {
 				}
 				// Clowder expects flat "Creator"s - might as well flatten all
 				// values...
-				if (singleContent.get(key) instanceof JSONArray) {
+				if (singleContent.get(safeKey) instanceof JSONArray) {
 					for (int i = 0; i < ((JSONArray) singleContent
 							.getJSONArray(key)).length(); i++) {
 						JSONObject flatContent = new JSONObject();
@@ -2162,7 +2163,7 @@ public class SEADUploader {
 												// wasn't found/created already
 					CloseableHttpClient httpclient = HttpClients
 							.createDefault();
-					String sourcepath = relPath + item.getName();
+					String sourcepath = relPath + item.getName().trim();
 					sourcepath = sourcepath.substring(sourcepath.substring(1)
 							.indexOf("/") + 1);
 
@@ -2216,7 +2217,7 @@ public class SEADUploader {
 				}
 			} else {
 				// A file
-				String sourcepath = path + item.getName();
+				String sourcepath = path + item.getName().trim();
 
 				if (sead2datasetId != null && !fileMDRetrieved) {
 					// One-time retrieval of all file id/Upload Path info
