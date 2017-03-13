@@ -44,6 +44,7 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -2147,7 +2148,7 @@ public class ItemServicesImpl
             pendingOREMaps.put(id, Response.status(Status.INTERNAL_SERVER_ERROR).entity(failmsgMap).build());
             return;
         }
-        pendingOREMaps.put(id, Response.ok().entity(oremap).build());
+        pendingOREMaps.put(id, Response.ok().entity(oremap).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_TYPE + "; charset=utf-8").build());
     }
 
     @SuppressWarnings("unchecked")
