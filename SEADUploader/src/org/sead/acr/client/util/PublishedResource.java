@@ -82,11 +82,6 @@ public class PublishedResource implements Resource {
 			put("similarTo", "http://www.openarchives.org/ore/terms/similarTo");
 			put("SHA1 Hash", "http://sead-data.net/terms/hasSHA1Digest");
 			put("Size", "tag:tupeloproject.org,2006:/2.0/files/length");
-			put("Title", "http://purl.org/dc/elements/1.1/title"); // used
-																	// directly
-																	// to be the
-																	// uploaded
-																	// filename
 			put("Mimetype", "http://purl.org/dc/elements/1.1/format"); // used
 																		// directly
 																		// to be
@@ -155,9 +150,11 @@ public class PublishedResource implements Resource {
 
 	@Override
 	public String getName() {
-		String name = resource.getString("Title");
+		String name = resource.getString("Label");
+		//Label should always exist and be valid....
 		if (name == null || name.length() == 0) {
-			name = resource.getString("Label");
+			System.err.println("Warning: Bad Label found for resource with title: " + resource.getString("Title"));
+			name = resource.getString("Title");
 		}
 		return name;
 	}
@@ -253,12 +250,15 @@ public class PublishedResource implements Resource {
 
 	@Override
 	public ContentBody getContentBody() {
-		String uri = resource.getString("similarTo");
+		//While space and / etc. are already encoded, the quote char is not and it is not a valid char
+		//Fix Me - identify additional chars that need to be encoded...
+		String uri = resource.getString("similarTo").replace("\"","%22");
+		
 		try {
 			HttpEntity entity = myFactory.getURI(new URI(uri));
 			return new InputStreamBody(entity.getContent(),
 					ContentType.create(resource.getString("Mimetype")),
-					resource.getString("Title")) {
+					resource.getString("Label")) {
 				public long getContentLength() {
 					log.debug("Content length called: " + length());
 					return length();
@@ -470,5 +470,4 @@ public class PublishedResource implements Resource {
 			resource.remove("Creator");
 		}
 	}
-
 }

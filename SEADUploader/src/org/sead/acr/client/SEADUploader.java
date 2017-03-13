@@ -860,9 +860,9 @@ public class SEADUploader {
 			jo.put("parentType", ((parentId == sead2datasetId) ? "dataset"
 					: "folder"));
 
-			StringEntity se = new StringEntity(jo.toString());
+			StringEntity se = new StringEntity(jo.toString(), "UTF-8");
 			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
+					"application/json; charset=utf-8"));
 			httppost.setEntity(se);
 
 			CloseableHttpResponse response = httpclient.execute(httppost,
@@ -887,7 +887,7 @@ public class SEADUploader {
 					}
 					folderPath = folderPath.substring(folderPath.substring(1)
 							.indexOf("/") + 1);
-					
+
 					HttpGet httpget = new HttpGet(server + "/api/datasets/"
 							+ sead2datasetId + "/folders");
 
@@ -983,9 +983,9 @@ public class SEADUploader {
 				}
 			}
 
-			StringEntity se = new StringEntity(jo.toString());
+			StringEntity se = new StringEntity(jo.toString(), "UTF-8");
 			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
+					"application/json; charset=utf-8"));
 			httppost.setEntity(se);
 
 			CloseableHttpResponse response = httpclient.execute(httppost,
@@ -1012,32 +1012,32 @@ public class SEADUploader {
 			if (datasetId != null) {
 
 				// Add Metadata
-				
+
 				JSONObject content = new JSONObject();
 				JSONObject context = new JSONObject();
 				JSONObject agent = new JSONObject();
 				List<String> creators = new ArrayList<String>();
 				content.put("Upload Path", path);
 				List<String> comments = new ArrayList<String>();
-				//Should be true for all PublishedResources, never for files...
+				// Should be true for all PublishedResources, never for files...
 				if (dir instanceof PublishedResource) {
-					((PublishedResource)dir).getAndRemoveCreator(creators);
+					((PublishedResource) dir).getAndRemoveCreator(creators);
 				}
-				
+
 				String creatorPostUri = server + "/api/datasets/" + datasetId
 						+ "/creator";
-				for(String creator: creators) {
+				for (String creator : creators) {
 					postDatasetCreator(creator, creatorPostUri, httpclient);
 				}
-				
+
 				String tagValues = add2ResourceMetadata(content, context,
 						agent, comments, path, dir);
 
 				postMetadata(httpclient, server + "/api/datasets/" + datasetId
 						+ "/metadata.jsonld", dir.getAbsolutePath(), content,
 						context, agent);
-				if(creators!=null) {
-					
+				if (creators != null) {
+
 				}
 				// FixMe Add tags
 				if (tagValues != null) {
@@ -1049,9 +1049,10 @@ public class SEADUploader {
 					JSONArray tagList = new JSONArray(tagArray);
 					tags.put("tags", tagList);
 
-					StringEntity se3 = new StringEntity(tags.toString());
+					StringEntity se3 = new StringEntity(tags.toString(),
+							"UTF-8");
 					se3.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-							"application/json"));
+							"application/json; charset=utf-8"));
 					tagPost.setEntity(se3);
 
 					CloseableHttpResponse tagResponse = httpclient.execute(
@@ -1083,9 +1084,10 @@ public class SEADUploader {
 						JSONObject comment = new JSONObject();
 						comment.put("text", text);
 
-						StringEntity se3 = new StringEntity(comment.toString());
+						StringEntity se3 = new StringEntity(comment.toString(),
+								"UTF-8");
 						se3.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-								"application/json"));
+								"application/json; charset=utf-8"));
 						commentPost.setEntity(se3);
 
 						CloseableHttpResponse commentResponse = httpclient
@@ -1125,7 +1127,7 @@ public class SEADUploader {
 
 	@SuppressWarnings("unchecked")
 	private static String add2ResourceMetadata(JSONObject content,
-			JSONObject context, JSONObject agent,  List<String> comments,
+			JSONObject context, JSONObject agent, List<String> comments,
 			String path, Resource item) {
 		Object tags = null;
 
@@ -1149,7 +1151,6 @@ public class SEADUploader {
 				original.remove("GeoPoint");
 
 			}
-
 
 			if (original.has("Comment")) {
 				Object comObject = original.get("Comment");
@@ -1668,8 +1669,10 @@ public class SEADUploader {
 				if (content.has("Abstract")) {
 
 					if (content.get("Abstract") instanceof JSONArray) {
-						//Convert multiple abstrascts into 1 so it fits Clowder's single description field
-						//Could concatenate, but JSON will help if anyone wants to separate abstracts after migration
+						// Convert multiple abstracts into 1 so it fits
+						// Clowder's single description field
+						// Could concatenate, but JSON will help if anyone wants
+						// to separate abstracts after migration
 						abs = ((JSONArray) content.getJSONArray("Abstract"))
 								.toString(2);
 					} else {
@@ -1678,6 +1681,19 @@ public class SEADUploader {
 					content.remove("Abstract");
 					context.remove("Abstract");
 				}
+				String title = null;
+				if (content.has("Title")) {
+
+					title = content.getString("Title").toString();
+					if (!title.equals(file.getName())) {
+						content.remove("Title");
+						context.remove("Title");
+
+					} else {
+						title = null;
+					}
+				}
+
 				postMetadata(httpclient, server + "/api/files/" + dataId
 						+ "/metadata.jsonld", file.getAbsolutePath(), content,
 						context, agent);
@@ -1689,9 +1705,10 @@ public class SEADUploader {
 
 					desc.put("description", abs);
 
-					StringEntity descSE = new StringEntity(desc.toString());
+					StringEntity descSE = new StringEntity(desc.toString(),
+							"UTF-8");
 					descSE.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-							"application/json"));
+							"application/json; charset=utf-8"));
 					descPut.setEntity(descSE);
 
 					CloseableHttpResponse descResponse = httpclient.execute(
@@ -1713,6 +1730,43 @@ public class SEADUploader {
 						descResponse.close();
 					}
 				}
+				// We need a valid filename (from "Label"/getName() to do the
+				// upload, but, if the user
+				// has changed the "Title", we need to then update the displayed
+				// filename
+				if (title != null) {
+					HttpPut namePut = new HttpPut(server + "/api/files/"
+							+ dataId + "/filename");
+					JSONObject name = new JSONObject();
+
+					name.put("name", title);
+
+					StringEntity nameSE = new StringEntity(name.toString(),
+							"UTF-8");
+					nameSE.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+							"application/json; charset=utf-8"));
+					namePut.setEntity(nameSE);
+
+					CloseableHttpResponse nameResponse = httpclient.execute(
+							namePut, localContext);
+					resEntity = null;
+					try {
+						resEntity = nameResponse.getEntity();
+						if (nameResponse.getStatusLine().getStatusCode() != 200) {
+							println("Error response when processing "
+									+ file.getAbsolutePath()
+									+ " : "
+									+ nameResponse.getStatusLine()
+											.getReasonPhrase());
+							println("Details: "
+									+ EntityUtils.toString(resEntity));
+						}
+					} finally {
+						EntityUtils.consumeQuietly(resEntity);
+						nameResponse.close();
+					}
+				}
+
 				// FixMe Add tags
 				if (tagValues != null) {
 					HttpPost tagPost = new HttpPost(server + "/api/files/"
@@ -1723,9 +1777,10 @@ public class SEADUploader {
 					JSONArray tagList = new JSONArray(tagArray);
 					tags.put("tags", tagList);
 
-					StringEntity se3 = new StringEntity(tags.toString());
+					StringEntity se3 = new StringEntity(tags.toString(),
+							"UTF-8");
 					se3.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-							"application/json"));
+							"application/json; charset=utf-8"));
 					tagPost.setEntity(se3);
 
 					CloseableHttpResponse tagResponse = httpclient.execute(
@@ -1758,9 +1813,10 @@ public class SEADUploader {
 						JSONObject comment = new JSONObject();
 						comment.put("text", text);
 
-						StringEntity se4 = new StringEntity(comment.toString());
+						StringEntity se4 = new StringEntity(comment.toString(),
+								"UTF-8");
 						se4.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-								"application/json"));
+								"application/json; charset=utf-8"));
 						commentPost.setEntity(se4);
 
 						CloseableHttpResponse commentResponse = httpclient
@@ -1813,8 +1869,10 @@ public class SEADUploader {
 
 		for (String key : keys) {
 			try {
-				String safeKey = key.replace(".", "_").replace("$", "_").replace("/", "_"); //Clowder/MongoDB don't allow keys with .$/ chars
-						
+				String safeKey = key.replace(".", "_").replace("$", "_")
+						.replace("/", "_"); // Clowder/MongoDB don't allow keys
+											// with .$/ chars
+
 				JSONObject singleContent = new JSONObject().put(safeKey,
 						content.get(key));
 				JSONObject singleContext = new JSONObject().put(safeKey,
@@ -1862,9 +1920,10 @@ public class SEADUploader {
 			meta.put("@context", singleContext);
 			meta.put("agent", agent);
 
-			StringEntity se2 = new StringEntity(meta.toString());
+			StringEntity se2 = new StringEntity(meta.toString(), "UTF-8");
+
 			se2.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
+					"application/json; charset=utf-8"));
 
 			HttpPost metadataPost = new HttpPost(uri);
 
@@ -1878,6 +1937,10 @@ public class SEADUploader {
 				println("Error response when processing key="
 						+ singleContent.keys().next() + " : "
 						+ mdResponse.getStatusLine().getReasonPhrase());
+				println("Value: "
+						+ singleContent.get(
+								singleContent.keys().next().toString())
+								.toString());
 				println("Details: " + EntityUtils.toString(resEntity));
 				throw new IOException("Non 200 response");
 			}
@@ -1886,29 +1949,29 @@ public class SEADUploader {
 		}
 
 	}
-	
-	private static void postDatasetCreator(String creator,
-			String uri, CloseableHttpClient httpclient) throws IOException {
+
+	private static void postDatasetCreator(String creator, String uri,
+			CloseableHttpClient httpclient) throws IOException {
 		HttpEntity resEntity = null;
 		try {
 			JSONObject body = new JSONObject();
 			body.put("creator", creator);
 
-			StringEntity se2 = new StringEntity(body.toString());
+			StringEntity se2 = new StringEntity(body.toString(), "UTF-8");
 			se2.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
+					"application/json; charset=utf-8"));
 
 			HttpPost creatorPost = new HttpPost(uri);
 
 			creatorPost.setEntity(se2);
 
-			CloseableHttpResponse creatorResponse = httpclient.execute(creatorPost,
-					localContext);
+			CloseableHttpResponse creatorResponse = httpclient.execute(
+					creatorPost, localContext);
 
 			resEntity = creatorResponse.getEntity();
 			if (creatorResponse.getStatusLine().getStatusCode() != 200) {
-				println("Error response when sending creator: "
-						+ creator + " : "
+				println("Error response when sending creator: " + creator
+						+ " : "
 						+ creatorResponse.getStatusLine().getReasonPhrase());
 				println("Details: " + EntityUtils.toString(resEntity));
 				throw new IOException("Non 200 response");
@@ -1917,7 +1980,6 @@ public class SEADUploader {
 			EntityUtils.consumeQuietly(resEntity);
 		}
 	}
-
 
 	private static void addTags(CloseableHttpClient httpclient,
 			Resource resource, String id, String tagValues)

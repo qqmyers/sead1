@@ -78,7 +78,7 @@ public class ResourceFactory {
 			HttpEntity he = getURI(oremapURL.toURI());
 			String mapString;
 
-			mapString = EntityUtils.toString(he);
+			mapString = EntityUtils.toString(he, "UTF-8");
 
 			oremap = new JSONObject(mapString);
 			// private ArrayList<String> indexResources(String aggId, JSONArray
@@ -109,6 +109,7 @@ public class ResourceFactory {
 		while (tries < 5) {
 			try {
 				HttpGet getResource = new HttpGet(uri);
+				getResource.setHeader("Content-type", "application/json;charset=utf-8");
 				log.trace("Retrieving " + tries + ": " + uri);
 				CloseableHttpResponse response;
 				response = client.execute(getResource);

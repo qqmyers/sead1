@@ -22,7 +22,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>org.sead.acr.client.SEADDatasetUploader</mainClass>
+							<mainClass>org.sead.acr.client.SEADUploader</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
