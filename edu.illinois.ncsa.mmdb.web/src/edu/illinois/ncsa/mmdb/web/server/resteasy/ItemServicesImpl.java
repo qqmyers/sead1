@@ -1649,6 +1649,8 @@ public class ItemServicesImpl
         Response r;
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
+        pendingOREMaps.remove(agg_id);
+
         if (pid == null) {
             result.put("Missing", "pid");
             r = Response.status(400).entity(result).build();
@@ -1972,8 +1974,12 @@ public class ItemServicesImpl
     static private ConcurrentHashMap<String, Object> pendingOREMaps = new ConcurrentHashMap<String, Object>();
 
     public static void removeMap(String id) {
-        log.debug("Remove map for ID: " + id);
-        pendingOREMaps.remove(id);
+        if (log.isDebugEnabled()) {
+            log.debug("Debug: Retaining map for ID (a potential memory leak): " + id);
+        } else {
+            log.info("Remove map for ID: " + id);
+            pendingOREMaps.remove(id);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -1986,8 +1992,8 @@ public class ItemServicesImpl
             return Response.status(Status.NOT_FOUND).build();
 
         } else {
-            log.debug("OREMap requested, clearing ID: " + id);
-            pendingOREMaps.remove(id);
+            // log.debug("OREMap requested, clearing ID: " + id);
+            // pendingOREMaps.remove(id);
             return (Response) o;
         }
     }

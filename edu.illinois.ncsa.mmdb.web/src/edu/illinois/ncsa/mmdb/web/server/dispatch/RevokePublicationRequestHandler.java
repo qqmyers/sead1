@@ -69,6 +69,7 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
@@ -96,6 +97,7 @@ public class RevokePublicationRequestHandler implements ActionHandler<RevokePubl
             throw new ActionException("access control failure", e);
         }
         try {
+
             TripleWriter tw = new TripleWriter();
 
             //1.5
@@ -126,6 +128,7 @@ public class RevokePublicationRequestHandler implements ActionHandler<RevokePubl
                     if (row.get(3) != null) {
                         tw.remove(aggId, RequestPublicationHandler.hasSalt, Resource.literal(row.get(3).toString()));
                     }
+                    ItemServicesImpl.removeMap(aggId.toString());
                     try {
                         //Send notice to service
                         String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
