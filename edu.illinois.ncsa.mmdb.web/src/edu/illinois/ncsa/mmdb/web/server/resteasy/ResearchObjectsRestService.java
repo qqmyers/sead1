@@ -107,7 +107,7 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
      */
     @GET
     @Path("/{id}")
-    @Produces("application/json; charset=utf-8")
+    @Produces("application/json")
     public Response getROAsORE_JSON_LD(@PathParam("id") String id, @QueryParam("pubtoken") String token, @javax.ws.rs.core.Context HttpServletRequest request) {
 
         //Hash key based access check:
