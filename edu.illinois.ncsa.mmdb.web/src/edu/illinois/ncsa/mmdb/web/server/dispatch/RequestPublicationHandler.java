@@ -256,7 +256,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                             rd.close();
                         } catch (IOException io) {
                             log.warn("2.0 Pub request call failed for " + aggId.toString(), io);
-                            ItemServicesImpl.removeMap(aggId.toString());
+                            ItemServicesImpl.removeMap(aggId.toString(), false);
                         }
                     }
                     catch (Exception e) {
@@ -268,7 +268,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         tw.remove(aggId, Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber"), Resource.literal(versionNumber));
                         tw.remove(aggId, hasSalt, Resource.literal(salt));
                         //Remove map if it was created
-                        ItemServicesImpl.removeMap(aggId.toString());
+                        ItemServicesImpl.removeMap(aggId.toString(), false);
 
                         try {
                             TupeloStore.getInstance().getContext().perform(tw);

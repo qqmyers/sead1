@@ -128,7 +128,7 @@ public class RevokePublicationRequestHandler implements ActionHandler<RevokePubl
                     if (row.get(3) != null) {
                         tw.remove(aggId, RequestPublicationHandler.hasSalt, Resource.literal(row.get(3).toString()));
                     }
-                    ItemServicesImpl.removeMap(aggId.toString());
+                    ItemServicesImpl.removeMap(aggId.toString(), true);
                     try {
                         //Send notice to service
                         String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);

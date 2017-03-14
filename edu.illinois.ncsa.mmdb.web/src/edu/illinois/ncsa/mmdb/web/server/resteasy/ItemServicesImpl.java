@@ -1973,8 +1973,8 @@ public class ItemServicesImpl
 
     static private ConcurrentHashMap<String, Object> pendingOREMaps = new ConcurrentHashMap<String, Object>();
 
-    public static void removeMap(String id) {
-        if (log.isDebugEnabled()) {
+    public static void removeMap(String id, boolean force) {
+        if (log.isDebugEnabled() && !force) {
             log.debug("Debug: Retaining map for ID (a potential memory leak): " + id);
         } else {
             log.info("Remove map for ID: " + id);
