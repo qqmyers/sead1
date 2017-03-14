@@ -111,6 +111,7 @@ public class ResourceFactory {
 				HttpGet getResource = new HttpGet(uri);
 				getResource.setHeader("Content-type", "application/json;charset=utf-8");
 				log.trace("Retrieving " + tries + ": " + uri);
+
 				CloseableHttpResponse response;
 				response = client.execute(getResource);
 				if (response.getStatusLine().getStatusCode() == 200) {

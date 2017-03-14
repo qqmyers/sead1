@@ -42,6 +42,7 @@ public class PublishedResource implements Resource {
 	private JSONObject resource;
 	private String path;
 	private String absPath;
+	private String origTitle = null;
 	private static ResourceFactory myFactory;
 
 	static final HashMap<String, String> blackList = new HashMap<String, String>() {
@@ -151,10 +152,15 @@ public class PublishedResource implements Resource {
 	@Override
 	public String getName() {
 		String name = resource.getString("Label");
-		//Label should always exist and be valid....
+		if(resource.has("Title")) {
+		origTitle=resource.getString("Title");
+		}
+		// Label should always exist and be valid....
 		if (name == null || name.length() == 0) {
-			System.err.println("Warning: Bad Label found for resource with title: " + resource.getString("Title"));
-			name = resource.getString("Title");
+			System.err
+					.println("Warning: Bad Label found for resource with title: "
+							+ origTitle);
+			name = origTitle;
 		}
 		return name;
 	}
@@ -250,21 +256,16 @@ public class PublishedResource implements Resource {
 
 	@Override
 	public ContentBody getContentBody() {
-		//While space and / etc. are already encoded, the quote char is not and it is not a valid char
-		//Fix Me - identify additional chars that need to be encoded...
-		String uri = resource.getString("similarTo").replace("\"","%22");
+		// While space and / etc. are already encoded, the quote char is not and
+		// it is not a valid char
+		// Fix Me - identify additional chars that need to be encoded...
+		String uri = resource.getString("similarTo").replace("\"", "%22");
 		
 		try {
 			HttpEntity entity = myFactory.getURI(new URI(uri));
 			return new InputStreamBody(entity.getContent(),
 					ContentType.create(resource.getString("Mimetype")),
-					resource.getString("Label")) {
-				public long getContentLength() {
-					log.debug("Content length called: " + length());
-					return length();
-				}
-
-			};
+					resource.getString("Label"));
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -384,7 +385,7 @@ public class PublishedResource implements Resource {
 
 		if (!ResourceFactory.grayConversions.containsKey(key)) {
 			if (key.equals("Label")) {
-				if (!((String) object).equals(getName())) {
+				if ((origTitle!=null)&&(!((String) object).equals(origTitle))) {
 					// It's unique - move it to orig metadata
 					origMD.put(key, object);
 				} else {
@@ -438,10 +439,31 @@ public class PublishedResource implements Resource {
 	public String getAndRemoveAbstract() {
 		String theAbstract = null;
 		if (resource.has("Abstract")) {
-			theAbstract = resource.getString("Abstract");
+			if (resource.get("Abstract") instanceof JSONArray) {
+				// Convert multiple abstracts into 1 so it fits
+				// Clowder's single description field
+				// Could concatenate, but JSON will help if anyone wants
+				// to separate abstracts after migration
+				theAbstract = ((JSONArray) resource.getJSONArray("Abstract"))
+						.toString(2);
+			} else {
+				theAbstract = resource.getString("Abstract").toString();
+			}
 			resource.remove("Abstract");
 		}
 		return theAbstract;
+	}
+	
+	/*
+	 * return the "Title" (which may be different than getName which comes from the "Label"
+	 */
+	public String getAndRemoveTitle() {
+		
+		if (resource.has("Title")) {
+			origTitle = resource.getString("Title");
+			resource.remove("Title");
+		}
+		return origTitle;
 	}
 
 	/*
