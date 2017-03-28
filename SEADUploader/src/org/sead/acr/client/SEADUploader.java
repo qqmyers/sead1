@@ -94,6 +94,7 @@ public class SEADUploader {
 	private static boolean merge = false;
 	private static boolean verify = false;
 	private static boolean importRO = false;
+	private static boolean d2a = false;
 	private static boolean sead2space = false;
 	private static String sead2datasetId = null;
 
@@ -130,7 +131,10 @@ public class SEADUploader {
 
 		for (String arg : args) {
 			println("Arg is : " + arg);
-			if (arg.equalsIgnoreCase("-listonly")) {
+			if (arg.equalsIgnoreCase("-d2a")) {
+				d2a = true;
+				println("Description to Abstract translation on");
+			} else if (arg.equalsIgnoreCase("-listonly")) {
 				listonly = true;
 				println("List Only Mode");
 			} else if (arg.equals("-merge")) {
@@ -163,6 +167,7 @@ public class SEADUploader {
 					|| (arg.equalsIgnoreCase("-verify"))
 					|| (arg.equalsIgnoreCase("-ro"))
 					|| (arg.equalsIgnoreCase("-sead2"))
+					|| (arg.equalsIgnoreCase("-d2a"))
 					|| (arg.startsWith("-limit")) || (arg.startsWith("-ex")))) {
 				// First non-flag arg is the server URL
 				if (server == null) {
@@ -250,9 +255,10 @@ public class SEADUploader {
 		if (merge) {
 
 			tagId = itemExists(rootPath + "/", dataset);
+			sead2datasetId = tagId;
 		}
 
-		String newUri = uploadCollection(dataset, rootPath, null, tagId);
+		String newUri = uploadCollection(dataset, rootPath, tagId, tagId);
 
 		if (newUri != null) {
 			println("              " + dataset.getPath() + " CREATED as: "
@@ -988,7 +994,7 @@ public class SEADUploader {
 			}
 			jo.put("name", title);
 			if (importRO) {
-				String abs = ((PublishedResource) dir).getAndRemoveAbstract();
+				String abs = ((PublishedResource) dir).getAndRemoveAbstract(d2a);
 				if (abs != null) {
 					jo.put("description", abs);
 				}
@@ -1675,7 +1681,7 @@ public class SEADUploader {
 					JSONObject agent = new JSONObject();
 
 					String abs = ((PublishedResource) file)
-							.getAndRemoveAbstract();
+							.getAndRemoveAbstract(d2a);
 					String title = ((PublishedResource) file)
 							.getAndRemoveTitle();
 					if (title.equals(file.getName())) {
