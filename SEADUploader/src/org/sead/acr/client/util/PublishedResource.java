@@ -152,8 +152,8 @@ public class PublishedResource implements Resource {
 	@Override
 	public String getName() {
 		String name = resource.getString("Label");
-		if(resource.has("Title")) {
-		origTitle=resource.getString("Title");
+		if (resource.has("Title")) {
+			origTitle = resource.getString("Title");
 		}
 		// Label should always exist and be valid....
 		if (name == null || name.length() == 0) {
@@ -260,7 +260,7 @@ public class PublishedResource implements Resource {
 		// it is not a valid char
 		// Fix Me - identify additional chars that need to be encoded...
 		String uri = resource.getString("similarTo").replace("\"", "%22");
-		
+
 		try {
 			HttpEntity entity = myFactory.getURI(new URI(uri));
 			return new InputStreamBody(entity.getContent(),
@@ -385,7 +385,8 @@ public class PublishedResource implements Resource {
 
 		if (!ResourceFactory.grayConversions.containsKey(key)) {
 			if (key.equals("Label")) {
-				if ((origTitle!=null)&&(!((String) object).equals(origTitle))) {
+				if ((origTitle != null)
+						&& (!((String) object).equals(origTitle))) {
 					// It's unique - move it to orig metadata
 					origMD.put(key, object);
 				} else {
@@ -436,29 +437,41 @@ public class PublishedResource implements Resource {
 	 * metadata in general, so retrieve the value and then remove it so that
 	 * duplicate metadata is not sent.
 	 */
-	public String getAndRemoveAbstract() {
+	public String getAndRemoveAbstract(boolean d2a) {
 		String theAbstract = null;
+		if (d2a) {
+			if (resource.has("Has Description")) {
+				theAbstract = resource.getString("Has Description").toString();
+				resource.remove("Has Description");
+			}
+		}
 		if (resource.has("Abstract")) {
+			if (theAbstract == null) {
+				theAbstract = "";
+			} else { //Combining with a description - add a space between
+				theAbstract = theAbstract + " ";
+			}
 			if (resource.get("Abstract") instanceof JSONArray) {
 				// Convert multiple abstracts into 1 so it fits
 				// Clowder's single description field
 				// Could concatenate, but JSON will help if anyone wants
 				// to separate abstracts after migration
-				theAbstract = ((JSONArray) resource.getJSONArray("Abstract"))
+				theAbstract = theAbstract + ((JSONArray) resource.getJSONArray("Abstract"))
 						.toString(2);
 			} else {
-				theAbstract = resource.getString("Abstract").toString();
+				theAbstract = theAbstract + resource.getString("Abstract").toString();
 			}
 			resource.remove("Abstract");
 		}
 		return theAbstract;
 	}
-	
+
 	/*
-	 * return the "Title" (which may be different than getName which comes from the "Label"
+	 * return the "Title" (which may be different than getName which comes from
+	 * the "Label"
 	 */
 	public String getAndRemoveTitle() {
-		
+
 		if (resource.has("Title")) {
 			origTitle = resource.getString("Title");
 			resource.remove("Title");
