@@ -36,12 +36,13 @@ import org.json.JSONObject;
  *
  */
 
-public class PublishedFolderProxyResource implements Resource {
+public class PublishedFolderProxyResource extends PublishedResource implements Resource {
 
 	private PublishedResource resource;
 	private String message;
 
 	public PublishedFolderProxyResource(PublishedResource pr, String folderId) {
+		super(pr.resource);
 		resource = pr;
 
 		StringBuilder sb = new StringBuilder();
@@ -60,6 +61,11 @@ public class PublishedFolderProxyResource implements Resource {
 		return "SEADImport.ReadMe.txt";
 	}
 
+	@Override
+	public String getAndRemoveTitle() {
+		return getName();
+		
+	}
 	@Override
 	public boolean isDirectory() {
 		return false;

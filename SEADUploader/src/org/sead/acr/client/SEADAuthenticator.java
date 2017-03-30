@@ -3,8 +3,10 @@
  */
 package org.sead.acr.client;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -144,9 +146,24 @@ public class SEADAuthenticator {
 		boolean authenticated = false;
 		log.info("Authenticating with username/password");
 
-		PasswordAuthentication passwordAuthentication = SEAD2UPLogin
+		PasswordAuthentication passwordAuthentication = null;
+		File up = new File("./upass.txt");
+		if (up.exists()) {
+			try {
+				BufferedReader bReader = new BufferedReader(new FileReader(up));
+				passwordAuthentication = new PasswordAuthentication(bReader.readLine(), bReader.readLine().toCharArray());
+				bReader.close();
+			} catch (IOException e) {
+				System.out.println("Uable to read u/p from file");
+				e.printStackTrace();
+			}
+			
+		} 
+		
+		if(passwordAuthentication == null) {
+		passwordAuthentication = SEAD2UPLogin
 				.getPasswordAuthentication();
-
+		}
 		// Now login to server and create a session
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {

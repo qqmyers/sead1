@@ -39,7 +39,7 @@ public class PublishedResource implements Resource {
 
 	static final Logger log = Logger.getLogger(PublishedResource.class);
 
-	private JSONObject resource;
+	protected JSONObject resource;
 	private String path;
 	private String absPath;
 	private String origTitle = null;
@@ -155,12 +155,32 @@ public class PublishedResource implements Resource {
 		if (resource.has("Title")) {
 			origTitle = resource.getString("Title");
 		}
+		if(isDirectory()) {
+		/*Since Clowder doesn't keep the original name of a folder if it is changed, 
+		 * and we use the name in paths, we can't write the name and change the visible 
+		 * label like we do with Files (done because labels may not be valid filenames
+		 * if they have unicode chars, etc.). So - a work-around is to always use the title for collections
+		 * and ignore the Label
+		 * This means the Label is lost for 1.5 collections - acceptable since, while it is captured in a publication,
+		 * it is not visible to the user via the GUI.
+		 */
+			if (origTitle == null || (origTitle.isEmpty())) {
+				name = "<no name>";
+			} else {
+				name = origTitle;
+			}
+		}
 		// Label should always exist and be valid....
-		if (name == null || name.length() == 0) {
+		if (name == null || name.isEmpty()) {
 			System.err
 					.println("Warning: Bad Label found for resource with title: "
 							+ origTitle);
-			name = origTitle;
+			// Handle rare/test cases where all are empty strings
+			if (origTitle == null || (origTitle.isEmpty())) {
+				name = "<no name>";
+			} else {
+				name = origTitle;
+			}
 		}
 		return name;
 	}
@@ -265,7 +285,7 @@ public class PublishedResource implements Resource {
 			HttpEntity entity = myFactory.getURI(new URI(uri));
 			return new InputStreamBody(entity.getContent(),
 					ContentType.create(resource.getString("Mimetype")),
-					resource.getString("Label"));
+					getName());
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -448,7 +468,7 @@ public class PublishedResource implements Resource {
 		if (resource.has("Abstract")) {
 			if (theAbstract == null) {
 				theAbstract = "";
-			} else { //Combining with a description - add a space between
+			} else { // Combining with a description - add a space between
 				theAbstract = theAbstract + " ";
 			}
 			if (resource.get("Abstract") instanceof JSONArray) {
@@ -456,10 +476,12 @@ public class PublishedResource implements Resource {
 				// Clowder's single description field
 				// Could concatenate, but JSON will help if anyone wants
 				// to separate abstracts after migration
-				theAbstract = theAbstract + ((JSONArray) resource.getJSONArray("Abstract"))
-						.toString(2);
+				theAbstract = theAbstract
+						+ ((JSONArray) resource.getJSONArray("Abstract"))
+								.toString(2);
 			} else {
-				theAbstract = theAbstract + resource.getString("Abstract").toString();
+				theAbstract = theAbstract
+						+ resource.getString("Abstract").toString();
 			}
 			resource.remove("Abstract");
 		}

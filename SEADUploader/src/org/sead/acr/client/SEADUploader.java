@@ -120,7 +120,7 @@ public class SEADUploader {
 	private static String CLOWDER_DEFAULT_VOCAB = "https://clowder.ncsa.illinois.edu/contexts/dummy";
 
 	public static void main(String args[]) throws Exception {
-
+		try {
 		File outputFile = new File("SEADUploadLog_"
 				+ System.currentTimeMillis() + ".txt");
 		try {
@@ -238,7 +238,13 @@ public class SEADUploader {
 			pw.flush();
 			pw.close();
 		}
-
+		} catch(Exception e) {
+			println(e.getLocalizedMessage());
+			e.printStackTrace(pw);
+			pw.flush();
+			System.exit(1);
+		}
+		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -946,7 +952,7 @@ public class SEADUploader {
 
 			// Add metadata for imported folders
 			// FixMe - Add Metadata to folder directly
-			// Assume we only write a metdata file if collection is newly
+			// Assume we only write a metadata file if collection is newly
 			// created and we're importing
 			if (importRO && collectionId != null) {
 				Resource mdFile = new PublishedFolderProxyResource(
@@ -1684,7 +1690,7 @@ public class SEADUploader {
 							.getAndRemoveAbstract(d2a);
 					String title = ((PublishedResource) file)
 							.getAndRemoveTitle();
-					if (title.equals(file.getName())) {
+					if((title!=null)&&(title.equals(file.getName()))) {
 						title = null;
 					}
 
@@ -1734,6 +1740,10 @@ public class SEADUploader {
 					// has changed the "Title", we need to then update the
 					// displayed
 					// filename
+					// For folders, this will currently always be null 
+					// (since Title is used for the name in PublishedResource
+					// for directories) and therefore we won't change the name of the readme file
+					// as set in the Proxy class.
 					if (title != null) {
 						HttpPut namePut = new HttpPut(server + "/api/files/"
 								+ dataId + "/filename");
