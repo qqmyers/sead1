@@ -18,6 +18,7 @@ package org.sead.acr.client.util;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -279,13 +280,13 @@ public class PublishedResource implements Resource {
 		// While space and / etc. are already encoded, the quote char is not and
 		// it is not a valid char
 		// Fix Me - identify additional chars that need to be encoded...
-		String uri = resource.getString("similarTo").replace("\"", "%22");
+		String uri = resource.getString("similarTo").replace("\"", "%22").replace(";","%3b");
 
 		try {
 			HttpEntity entity = myFactory.getURI(new URI(uri));
 			return new InputStreamBody(entity.getContent(),
 					ContentType.create(resource.getString("Mimetype")),
-					getName());
+					URLEncoder.encode(getName(), "utf-8"));
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -461,7 +462,12 @@ public class PublishedResource implements Resource {
 		String theAbstract = null;
 		if (d2a) {
 			if (resource.has("Has Description")) {
-				theAbstract = resource.getString("Has Description").toString();
+				Object descObject = resource.get("Has Description");
+				if(descObject instanceof String) {
+					theAbstract = descObject.toString();
+				} else if (descObject instanceof JSONArray) {
+					theAbstract= ((JSONArray)descObject).toString();
+				}
 				resource.remove("Has Description");
 			}
 		}

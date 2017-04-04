@@ -18,6 +18,7 @@ package org.sead.acr.client;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -31,10 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.TitlePaneLayout;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -121,111 +124,115 @@ public class SEADUploader {
 
 	public static void main(String args[]) throws Exception {
 		try {
-		File outputFile = new File("SEADUploadLog_"
-				+ System.currentTimeMillis() + ".txt");
-		try {
-			pw = new PrintWriter(new FileWriter(outputFile));
-		} catch (Exception e) {
-			println(e.getMessage());
-		}
-
-		for (String arg : args) {
-			println("Arg is : " + arg);
-			if (arg.equalsIgnoreCase("-d2a")) {
-				d2a = true;
-				println("Description to Abstract translation on");
-			} else if (arg.equalsIgnoreCase("-listonly")) {
-				listonly = true;
-				println("List Only Mode");
-			} else if (arg.equals("-merge")) {
-				merge = true;
-				println("Merge mode ON");
-			} else if (arg.equals("-verify")) {
-				verify = true;
-				println("Verify Mode: Will verify hash values for file comparisons");
-			} else if (arg.equals("-ro")) {
-				importRO = true;
-				println("RO Mode: Intpreting last commandline arg as the URL for an OREMap");
-			} else if (arg.equalsIgnoreCase("-sead2")) {
-				sead2space = true;
-				println("SEAD2 Space: Uploading to a SEAD2 Instance");
-			} else if (arg.startsWith("-limit")) {
-				max = Long.parseLong(arg.substring(6));
-				println("Max ingest file count: " + max);
-			} else if (arg.startsWith("-ex")) {
-
-				excluded.add(arg.substring(3));
-				println("Exluding pattern: " + arg.substring(3));
+			File outputFile = new File("SEADUploadLog_"
+					+ System.currentTimeMillis() + ".txt");
+			try {
+				pw = new PrintWriter(new FileWriter(outputFile));
+			} catch (Exception e) {
+				println(e.getMessage());
 			}
 
-		}
+			for (String arg : args) {
+				println("Arg is : " + arg);
+				if (arg.equalsIgnoreCase("-d2a")) {
+					d2a = true;
+					println("Description to Abstract translation on");
+				} else if (arg.equalsIgnoreCase("-listonly")) {
+					listonly = true;
+					println("List Only Mode");
+				} else if (arg.equals("-merge")) {
+					merge = true;
+					println("Merge mode ON");
+				} else if (arg.equals("-verify")) {
+					verify = true;
+					println("Verify Mode: Will verify hash values for file comparisons");
+				} else if (arg.equals("-ro")) {
+					importRO = true;
+					println("RO Mode: Intpreting last commandline arg as the URL for an OREMap");
+				} else if (arg.equalsIgnoreCase("-sead2")) {
+					sead2space = true;
+					println("SEAD2 Space: Uploading to a SEAD2 Instance");
+				} else if (arg.startsWith("-limit")) {
+					max = Long.parseLong(arg.substring(6));
+					println("Max ingest file count: " + max);
+				} else if (arg.startsWith("-ex")) {
 
-		// go through arguments
-		for (String arg : args) {
-			if (!((arg.equalsIgnoreCase("-listonly"))
-					|| (arg.equalsIgnoreCase("-merge"))
-					|| (arg.equalsIgnoreCase("-verify"))
-					|| (arg.equalsIgnoreCase("-ro"))
-					|| (arg.equalsIgnoreCase("-sead2"))
-					|| (arg.equalsIgnoreCase("-d2a"))
-					|| (arg.startsWith("-limit")) || (arg.startsWith("-ex")))) {
-				// First non-flag arg is the server URL
-				if (server == null) {
-					println("Server: " + arg);
-					server = arg;
-					if (sead2space) {
-						localContext = SEADAuthenticator.UPAuthenticate(server);
-					} else {
-						localContext = SEADAuthenticator.authenticate(server);
-					}
-					if (localContext == null) {
-						println("Authentication failure - exiting.");
-						System.exit(0);
-					}
-				} else {
-					if (importRO) {
-						// Should be a URL
-						try {
-							URL oremapURL = new URL(arg);
-							importRO(oremapURL);
-						} catch (MalformedURLException mfue) {
-							println("Unable to interpret: " + arg
-									+ " as a URL to an OREMap.");
+					excluded.add(arg.substring(3));
+					println("Exluding pattern: " + arg.substring(3));
+				}
+
+			}
+
+			// go through arguments
+			for (String arg : args) {
+				if (!((arg.equalsIgnoreCase("-listonly"))
+						|| (arg.equalsIgnoreCase("-merge"))
+						|| (arg.equalsIgnoreCase("-verify"))
+						|| (arg.equalsIgnoreCase("-ro"))
+						|| (arg.equalsIgnoreCase("-sead2"))
+						|| (arg.equalsIgnoreCase("-d2a"))
+						|| (arg.startsWith("-limit")) || (arg.startsWith("-ex")))) {
+					// First non-flag arg is the server URL
+					if (server == null) {
+						println("Server: " + arg);
+						server = arg;
+						if (sead2space) {
+							localContext = SEADAuthenticator
+									.UPAuthenticate(server);
+						} else {
+							localContext = SEADAuthenticator
+									.authenticate(server);
+						}
+						if (localContext == null) {
+							println("Authentication failure - exiting.");
 							System.exit(0);
 						}
 					} else {
-						// It's a local path to a file or dir
-						Resource file = new FileResource(arg);
-						if (!excluded(file.getName())) {
-							String tagId = null;
-							if (merge) {
-								tagId = itemExists("/", file);
+						if (importRO) {
+							// Should be a URL
+							try {
+								URL oremapURL = new URL(arg);
+								importRO(oremapURL);
+							} catch (MalformedURLException mfue) {
+								println("Unable to interpret: " + arg
+										+ " as a URL to an OREMap.");
+								System.exit(0);
 							}
-
-							if (file.isDirectory()) {
-
-								String newUri = uploadCollection(file, "",
-										null, tagId);
-
-								if (newUri != null) {
-									println("              " + file.getPath()
-											+ " CREATED as: " + newUri);
-								} else if ((tagId == null) && !listonly) {
-									println("Error processing: "
-											+ file.getPath());
+						} else {
+							// It's a local path to a file or dir
+							Resource file = new FileResource(arg);
+							if (!excluded(file.getName())) {
+								String tagId = null;
+								if (merge) {
+									tagId = itemExists("/", file);
 								}
 
-							} else {
+								if (file.isDirectory()) {
 
-								if (globalFileCount < max) {
-									String newUri = uploadDataset(file, null,
-											tagId);
+									String newUri = uploadCollection(file, "",
+											null, tagId);
+
 									if (newUri != null) {
-										println("              UPLOADED as: "
-												+ newUri);
+										println("              "
+												+ file.getPath()
+												+ " CREATED as: " + newUri);
 									} else if ((tagId == null) && !listonly) {
 										println("Error processing: "
 												+ file.getPath());
+									}
+
+								} else {
+
+									if (globalFileCount < max) {
+										String newUri = uploadDataset(file,
+												null, tagId);
+										if (newUri != null) {
+											println("              UPLOADED as: "
+													+ newUri);
+										} else if ((tagId == null) && !listonly) {
+											println("Error processing: "
+													+ file.getPath());
+										}
 									}
 								}
 							}
@@ -233,18 +240,17 @@ public class SEADUploader {
 					}
 				}
 			}
-		}
-		if (pw != null) {
-			pw.flush();
-			pw.close();
-		}
-		} catch(Exception e) {
+			if (pw != null) {
+				pw.flush();
+				pw.close();
+			}
+		} catch (Exception e) {
 			println(e.getLocalizedMessage());
 			e.printStackTrace(pw);
 			pw.flush();
 			System.exit(1);
 		}
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -327,6 +333,11 @@ public class SEADUploader {
 										.getString(predLabel));
 								if (newObject != null) {
 									newObject = server + "/files/" + newObject;
+								} else { // Object is not in this Dataset and
+											// can't be translated - use
+											// original URI
+									newObject = relationships
+											.getString(predLabel);
 								}
 							}
 
@@ -1000,7 +1011,8 @@ public class SEADUploader {
 			}
 			jo.put("name", title);
 			if (importRO) {
-				String abs = ((PublishedResource) dir).getAndRemoveAbstract(d2a);
+				String abs = ((PublishedResource) dir)
+						.getAndRemoveAbstract(d2a);
 				if (abs != null) {
 					jo.put("description", abs);
 				}
@@ -1167,11 +1179,20 @@ public class SEADUploader {
 				original.remove("Keyword");
 			}
 			if (original.has("GeoPoint")) {
-				JSONObject point = original.getJSONObject("GeoPoint");
-				metadata.put("Geolocation", "Lat/Long from SEAD 1.5 GeoPoint");
-				metadata.put("Latitude", point.getString("lat"));
-				metadata.put("Longitude", point.getString("long"));
-				original.remove("GeoPoint");
+				Object gpObject = original.get("GeoPoint");
+				if (gpObject instanceof JSONArray) {
+					// An error so we'll just capture as a string
+					metadata.put("Geolocation",
+							"This entry had multiple Lat/Long from SEAD 1.5 GeoPoints: "
+									+ ((JSONArray) gpObject).toString(2));
+				} else {
+					JSONObject point = original.getJSONObject("GeoPoint");
+					metadata.put("Geolocation",
+							"Lat/Long from SEAD 1.5 GeoPoint");
+					metadata.put("Latitude", point.getString("lat"));
+					metadata.put("Longitude", point.getString("long"));
+					original.remove("GeoPoint");
+				}
 
 			}
 
@@ -1664,6 +1685,10 @@ public class SEADUploader {
 							+ response.getStatusLine().getReasonPhrase());
 					println("Details: " + EntityUtils.toString(resEntity));
 				}
+
+			} catch (Exception e) {
+				println("Error uploading file: " + file.getName());
+				e.printStackTrace();
 			} finally {
 				EntityUtils.consumeQuietly(response.getEntity());
 				response.close();
@@ -1690,7 +1715,7 @@ public class SEADUploader {
 							.getAndRemoveAbstract(d2a);
 					String title = ((PublishedResource) file)
 							.getAndRemoveTitle();
-					if((title!=null)&&(title.equals(file.getName()))) {
+					if ((title != null) && (title.equals(file.getName()))) {
 						title = null;
 					}
 
@@ -1740,9 +1765,10 @@ public class SEADUploader {
 					// has changed the "Title", we need to then update the
 					// displayed
 					// filename
-					// For folders, this will currently always be null 
+					// For folders, this will currently always be null
 					// (since Title is used for the name in PublishedResource
-					// for directories) and therefore we won't change the name of the readme file
+					// for directories) and therefore we won't change the name
+					// of the readme file
 					// as set in the Proxy class.
 					if (title != null) {
 						HttpPut namePut = new HttpPut(server + "/api/files/"
@@ -1893,10 +1919,16 @@ public class SEADUploader {
 				// Geolocation stays together with lat and long to mirror
 				// how the Clowder GUI works
 				if (key.equals("Geolocation")) {
-					singleContent.put("Latitude", content.get("Latitude"));
-					singleContent.put("Longitude", content.get("Longitude"));
-					singleContext.put("Latitude", context.get("Latitude"));
-					singleContext.put("Longitude", context.get("Longitude"));
+					if (content.has("Latitude")) {
+						singleContent.put("Latitude", content.get("Latitude"));
+						singleContext.put("Latitude", context.get("Latitude"));
+					}
+					if (content.has("Longitude")) {
+						singleContent
+								.put("Longitude", content.get("Longitude"));
+						singleContext
+								.put("Longitude", context.get("Longitude"));
+					}
 				}
 				// Clowder expects flat "Creator"s - might as well flatten all
 				// values...
@@ -2128,8 +2160,8 @@ public class SEADUploader {
 				String sourcepath = path + item.getName();
 				if (!datasetMDRetrieved) {
 					try {
-
-						String serviceUrl = server + "/api/datasets/";
+						// Only returns first 12 by default
+						String serviceUrl = server + "/api/datasets?limit=0";
 
 						HttpGet httpget = new HttpGet(serviceUrl);
 
@@ -2189,8 +2221,8 @@ public class SEADUploader {
 																	.getJSONObject(
 																			"content")
 																	.getString(
-																			"Upload Path"),
-																	id);
+																			"Upload Path")
+																	.trim(), id);
 													break;
 												}
 											}
@@ -2231,7 +2263,7 @@ public class SEADUploader {
 				/*
 				 * /We're looking for a folder Since folders in 2 have no
 				 * metadata and can't be moved, we will assume for now that if
-				 * the dataset exists and the foldere's relative path in the
+				 * the dataset exists and the folder's relative path in the
 				 * dataset matches, we've found the folder.
 				 */
 				if (sead2datasetId != null) { // Can't be in a dataset if it
@@ -2361,8 +2393,8 @@ public class SEADUploader {
 																	.getJSONObject(
 																			"content")
 																	.getString(
-																			"Upload Path"),
-																	id);
+																			"Upload Path")
+																	.trim(), id);
 													break;
 												}
 											}
@@ -2475,10 +2507,13 @@ public class SEADUploader {
 
 		try {
 			if (sead2space) {
-				// sha1: "http://www.w3.org/2001/04/xmldsig-more#sha1"
+				// Work-around - our sead2 servers have issues with incorrect or
+				// missing hash values
+				// So implementing a direct download and compute option for now.
+				// Can be added as a
+				// permanent option or replaced with the metadata check later
 				serviceUrl = server + "/api/files/"
-						+ URLEncoder.encode(tagId, "UTF-8")
-						+ "/metadata.jsonld";
+						+ URLEncoder.encode(tagId, "UTF-8") + "/blob";
 				HttpGet httpget = new HttpGet(serviceUrl);
 
 				CloseableHttpResponse response = httpclient.execute(httpget,
@@ -2487,36 +2522,36 @@ public class SEADUploader {
 					if (response.getStatusLine().getStatusCode() == 200) {
 						HttpEntity resEntity = response.getEntity();
 						if (resEntity != null) {
-							String json = EntityUtils.toString(resEntity);
-							JSONArray metadata = new JSONArray(json);
-							String remoteHash = null;
-							for (int i = 0; i < metadata.length(); i++) {
-								JSONObject content = metadata.getJSONObject(i)
-										.getJSONObject("content");
-								if (content != null) {
-									if (content.has("sha1")) {
-										remoteHash = content.getString("sha1");
-										break;
-									}
-								}
-							}
-							if (remoteHash != null) {
-								if (!remoteHash.equals(item.getSHA1Hash())) {
+							String realHash = null;
+							InputStream inputStream = resEntity.getContent();
+							realHash = DigestUtils.sha1Hex(inputStream);
+							/*
+							 * if (hashtype != null) { if
+							 * (hashtype.equals("SHA1 Hash")) { realHash =
+							 * DigestUtils.sha1Hex(inputStream);
+							 * 
+							 * } else if (hashtype.equals("SHA512 Hash")) {
+							 * realHash = DigestUtils.sha512Hex(inputStream); }
+							 */
+
+							if (realHash != null) {
+								if (!realHash.equals(item.getSHA1Hash())) {
 									hashIssues.put(path + item.getName(),
 											"!!!: A different version of this item exists with ID: "
 													+ tagId);
 									return null;
 								} // else it matches!
 							} else {
-								hashIssues.put(path + item.getName(),
-										"Remote Hash does not exist for "
+								hashIssues.put(
+										path + item.getName(),
+										"Error calculating hash for "
 												+ item.getAbsolutePath()
 												+ " - cannot verify it");
 								return null;
 							}
 						}
 					} else {
-						println("Error response while verifying "
+						println("Error downloading file to verify "
 								+ item.getAbsolutePath() + " : "
 								+ response.getStatusLine().getReasonPhrase());
 
@@ -2524,7 +2559,36 @@ public class SEADUploader {
 				} finally {
 					response.close();
 				}
-
+				/*
+				 * // sha1: "http://www.w3.org/2001/04/xmldsig-more#sha1"
+				 * serviceUrl = server + "/api/files/" +
+				 * URLEncoder.encode(tagId, "UTF-8") + "/metadata.jsonld";
+				 * HttpGet httpget = new HttpGet(serviceUrl);
+				 * 
+				 * CloseableHttpResponse response = httpclient.execute(httpget,
+				 * localContext); try { if
+				 * (response.getStatusLine().getStatusCode() == 200) {
+				 * HttpEntity resEntity = response.getEntity(); if (resEntity !=
+				 * null) { String json = EntityUtils.toString(resEntity);
+				 * JSONArray metadata = new JSONArray(json); String remoteHash =
+				 * null; for (int i = 0; i < metadata.length(); i++) {
+				 * JSONObject content = metadata.getJSONObject(i)
+				 * .getJSONObject("content"); if (content != null) { if
+				 * (content.has("sha1")) { remoteHash =
+				 * content.getString("sha1"); break; } } } if (remoteHash !=
+				 * null) { if (!remoteHash.equals(item.getSHA1Hash())) {
+				 * hashIssues.put(path + item.getName(),
+				 * "!!!: A different version of this item exists with ID: " +
+				 * tagId); return null; } // else it matches! } else {
+				 * hashIssues.put(path + item.getName(),
+				 * "Remote Hash does not exist for " + item.getAbsolutePath() +
+				 * " - cannot verify it"); return null; } } } else {
+				 * println("Error response while verifying " +
+				 * item.getAbsolutePath() + " : " +
+				 * response.getStatusLine().getReasonPhrase());
+				 * 
+				 * } } finally { response.close(); }
+				 */
 			} else {
 				serviceUrl = server + "/resteasy/datasets/"
 						+ URLEncoder.encode(tagId, "UTF-8") + "/biblio";
