@@ -289,6 +289,8 @@ public class SEADUploader {
 		if (!listonly) {
 			for (String relSubject : (Set<String>) rels.keySet()) {
 				JSONObject relationships = rels.getJSONObject(relSubject);
+				println(relationships.toString(2));
+
 				String newSubject = null;
 				String type = "collections";
 				newSubject = roCollIdToNewId
@@ -303,7 +305,7 @@ public class SEADUploader {
 					type = "datasets";
 				}
 				if ((newSubject != null) && (relationships.length() != 0)) {
-
+					println("Subject: " + newSubject + " for " + relSubject);
 					if (sead2space) {
 
 						JSONObject content = new JSONObject();
@@ -317,30 +319,71 @@ public class SEADUploader {
 
 						for (String predLabel : (Set<String>) relationships
 								.keySet()) {
-							String newObject = roCollIdToNewId
-									.get(relationships.getString(predLabel));
-							if (newObject != null) {
-								if (newObject.equals(sead2datasetId)) {
-									newObject = server + "/datasets/"
-											+ newObject;
-								} else {
-									newObject = server + "/datasets/"
-											+ sead2datasetId + "#folderId"
-											+ newObject;
-								}
-							} else {
-								newObject = roDataIdToNewId.get(relationships
+							Object newObject = null;
+							if (relationships.get(predLabel) instanceof String) {
+								newObject = roCollIdToNewId.get(relationships
 										.getString(predLabel));
 								if (newObject != null) {
-									newObject = server + "/files/" + newObject;
-								} else { // Object is not in this Dataset and
-											// can't be translated - use
-											// original URI
-									newObject = relationships
-											.getString(predLabel);
+									if (newObject.equals(sead2datasetId)) {
+										newObject = server + "/datasets/"
+												+ newObject;
+									} else {
+										newObject = server + "/datasets/"
+												+ sead2datasetId + "#folderId"
+												+ newObject;
+									}
+								} else {
+									newObject = roDataIdToNewId
+											.get(relationships
+													.getString(predLabel));
+									if (newObject != null) {
+										newObject = server + "/files/"
+												+ newObject;
+									} else { // Object is not in this Dataset
+												// and
+												// can't be translated - use
+												// original URI
+										newObject = relationships
+												.getString(predLabel);
+									}
 								}
-							}
+								println(newSubject + ": " + predLabel + ": "
+										+ newObject.toString());
+							} else { // JSONArray
+								newObject = new JSONArray();
 
+								JSONArray objects = (JSONArray) relationships
+										.get(predLabel);
+								for (int i = 0; i < objects.length(); i++) {
+									String ob = objects.getString(i);
+									String newOb = null;
+									newOb = roCollIdToNewId.get(ob);
+									if (newOb != null) {
+										if (newOb.equals(sead2datasetId)) {
+											newOb = server + "/datasets/"
+													+ newOb;
+										} else {
+											newOb = server + "/datasets/"
+													+ sead2datasetId
+													+ "#folderId" + newOb;
+										}
+									} else {
+										newOb = roDataIdToNewId.get(ob);
+										if (newOb != null) {
+											newOb = server + "/files/" + newOb;
+										} else { // Object is not in this
+													// Dataset and
+													// can't be translated - use
+													// original URI
+											newOb = ob;
+										}
+									}
+									((JSONArray) newObject).put(newOb);
+								}
+
+							}
+							println("Writing: " + predLabel + " : "
+									+ newObject.toString());
 							content.put(predLabel, newObject);
 
 						}
@@ -1797,6 +1840,9 @@ public class SEADUploader {
 												.getReasonPhrase());
 								println("Details: "
 										+ EntityUtils.toString(resEntity));
+							} else {
+								println("Dataset name successfully changed from : "
+										+ file.getName() + " to " + title);
 							}
 						} finally {
 							EntityUtils.consumeQuietly(resEntity);

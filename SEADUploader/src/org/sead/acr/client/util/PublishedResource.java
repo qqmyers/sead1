@@ -18,8 +18,6 @@ package org.sead.acr.client.util;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,7 +32,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sead.acr.client.SEADUploader;
 
 public class PublishedResource implements Resource {
 
@@ -286,7 +283,7 @@ public class PublishedResource implements Resource {
 			HttpEntity entity = myFactory.getURI(new URI(uri));
 			return new InputStreamBody(entity.getContent(),
 					ContentType.create(resource.getString("Mimetype")),
-					URLEncoder.encode(getName(), "utf-8"));
+					getName());
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -320,7 +317,7 @@ public class PublishedResource implements Resource {
 	public JSONObject getMetadata() {
 		ArrayList<String> keysToKeep = new ArrayList<String>();
 		keysToKeep.addAll(resource.keySet());
-		HashMap<String, String> relationships = new HashMap<String, String>();
+		HashMap<String, Object> relationships = new HashMap<String, Object>();
 
 		HashMap<String, Object> changed = new HashMap<String, Object>();
 		for (String key : (Set<String>) resource.keySet()) {
@@ -363,15 +360,16 @@ public class PublishedResource implements Resource {
 			} else if (md.get(key) instanceof JSONArray) {
 				JSONArray vals = md.getJSONArray(key);
 				JSONArray newvals = new JSONArray();
+				JSONArray newrels = new JSONArray();
 
 				for (int i = 0; i < vals.length(); i++) {
 					// SEADUploader.println("Checking: " + i + " : "
 					// + vals.get(i).toString());
 					if (vals.get(i) instanceof String) {
-
+						//relationships always have a string value by definition
 						if (vals.getString(i).startsWith("tag:")
 								|| vals.getString(i).startsWith("urn:")) {
-							relationships.put(key, vals.getString(i));
+							newrels.put(vals.getString(i));
 						} else {
 							Object updated = convert(key, vals.getString(i));
 							if (updated != null) {
@@ -387,6 +385,9 @@ public class PublishedResource implements Resource {
 				}
 				if (newvals.length() != 0) {
 					changed.put(key, newvals);
+				}
+				if (newrels.length() != 0) {
+					relationships.put(key, newrels);
 				}
 			} else {
 				changed.put(key, md.get(key));
