@@ -1737,195 +1737,191 @@ public class SEADUploader {
 				response.close();
 			}
 			if (dataId != null) {
+
+				// FixMe - add Metadata
+				/*
+				 * addLiteralMetadata(meb, FRBR_EO, path);
+				 * 
+				 * // Add metadata for published resources
+				 * 
+				 * String tagValues = addResourceMetadata(meb, dir); HttpEntity
+				 * reqEntity = meb.build();
+				 */
+
+				JSONObject content = new JSONObject();
+				List<String> comments = new ArrayList<String>();
+				JSONObject context = new JSONObject();
+				JSONObject agent = new JSONObject();
+
+				String abs = null;
+				String title = null;
 				if (file instanceof PublishedResource) {
+					abs = ((PublishedResource) file).getAndRemoveAbstract(d2a);
 
-					// FixMe - add Metadata
-					/*
-					 * addLiteralMetadata(meb, FRBR_EO, path);
-					 * 
-					 * // Add metadata for published resources
-					 * 
-					 * String tagValues = addResourceMetadata(meb, dir);
-					 * HttpEntity reqEntity = meb.build();
-					 */
-
-					JSONObject content = new JSONObject();
-					List<String> comments = new ArrayList<String>();
-					JSONObject context = new JSONObject();
-					JSONObject agent = new JSONObject();
-
-					String abs = ((PublishedResource) file)
-							.getAndRemoveAbstract(d2a);
-					String title = ((PublishedResource) file)
-							.getAndRemoveTitle();
+					title = ((PublishedResource) file).getAndRemoveTitle();
 					if ((title != null) && (title.equals(file.getName()))) {
 						title = null;
 					}
+				}
+				String tagValues = add2ResourceMetadata(content, context,
+						agent, comments, path, file);
 
-					String tagValues = add2ResourceMetadata(content, context,
-							agent, comments, path, file);
+				postMetadata(httpclient, server + "/api/files/" + dataId
+						+ "/metadata.jsonld", file.getAbsolutePath(), content,
+						context, agent);
 
-					postMetadata(httpclient, server + "/api/files/" + dataId
-							+ "/metadata.jsonld", file.getAbsolutePath(),
-							content, context, agent);
+				if (abs != null) {
+					HttpPut descPut = new HttpPut(server + "/api/files/"
+							+ dataId + "/updateDescription");
+					JSONObject desc = new JSONObject();
 
-					if (abs != null) {
-						HttpPut descPut = new HttpPut(server + "/api/files/"
-								+ dataId + "/updateDescription");
-						JSONObject desc = new JSONObject();
+					desc.put("description", abs);
 
-						desc.put("description", abs);
+					StringEntity descSE = new StringEntity(desc.toString(),
+							"UTF-8");
+					descSE.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+							"application/json; charset=utf-8"));
+					descPut.setEntity(descSE);
 
-						StringEntity descSE = new StringEntity(desc.toString(),
-								"UTF-8");
-						descSE.setContentType(new BasicHeader(
-								HTTP.CONTENT_TYPE,
-								"application/json; charset=utf-8"));
-						descPut.setEntity(descSE);
-
-						CloseableHttpResponse descResponse = httpclient
-								.execute(descPut, localContext);
-						resEntity = null;
-						try {
-							resEntity = descResponse.getEntity();
-							if (descResponse.getStatusLine().getStatusCode() != 200) {
-								println("Error response when processing "
-										+ file.getAbsolutePath()
-										+ " : "
-										+ descResponse.getStatusLine()
-												.getReasonPhrase());
-								println("Details: "
-										+ EntityUtils.toString(resEntity));
-							}
-						} finally {
-							EntityUtils.consumeQuietly(resEntity);
-							descResponse.close();
+					CloseableHttpResponse descResponse = httpclient.execute(
+							descPut, localContext);
+					resEntity = null;
+					try {
+						resEntity = descResponse.getEntity();
+						if (descResponse.getStatusLine().getStatusCode() != 200) {
+							println("Error response when processing "
+									+ file.getAbsolutePath()
+									+ " : "
+									+ descResponse.getStatusLine()
+											.getReasonPhrase());
+							println("Details: "
+									+ EntityUtils.toString(resEntity));
 						}
+					} finally {
+						EntityUtils.consumeQuietly(resEntity);
+						descResponse.close();
 					}
-					// We need a valid filename (from "Label"/getName() to do
-					// the
-					// upload, but, if the user
-					// has changed the "Title", we need to then update the
-					// displayed
-					// filename
-					// For folders, this will currently always be null
-					// (since Title is used for the name in PublishedResource
-					// for directories) and therefore we won't change the name
-					// of the readme file
-					// as set in the Proxy class.
-					if (title != null) {
-						HttpPut namePut = new HttpPut(server + "/api/files/"
-								+ dataId + "/filename");
-						JSONObject name = new JSONObject();
+				}
+				// We need a valid filename (from "Label"/getName() to do
+				// the
+				// upload, but, if the user
+				// has changed the "Title", we need to then update the
+				// displayed
+				// filename
+				// For folders, this will currently always be null
+				// (since Title is used for the name in PublishedResource
+				// for directories) and therefore we won't change the name
+				// of the readme file
+				// as set in the Proxy class.
+				if (title != null) {
+					HttpPut namePut = new HttpPut(server + "/api/files/"
+							+ dataId + "/filename");
+					JSONObject name = new JSONObject();
 
-						name.put("name", title);
+					name.put("name", title);
 
-						StringEntity nameSE = new StringEntity(name.toString(),
-								"UTF-8");
-						nameSE.setContentType(new BasicHeader(
-								HTTP.CONTENT_TYPE,
-								"application/json; charset=utf-8"));
-						namePut.setEntity(nameSE);
+					StringEntity nameSE = new StringEntity(name.toString(),
+							"UTF-8");
+					nameSE.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+							"application/json; charset=utf-8"));
+					namePut.setEntity(nameSE);
 
-						CloseableHttpResponse nameResponse = httpclient
-								.execute(namePut, localContext);
-						resEntity = null;
-						try {
-							resEntity = nameResponse.getEntity();
-							if (nameResponse.getStatusLine().getStatusCode() != 200) {
-								println("Error response when processing "
-										+ file.getAbsolutePath()
-										+ " : "
-										+ nameResponse.getStatusLine()
-												.getReasonPhrase());
-								println("Details: "
-										+ EntityUtils.toString(resEntity));
-							} else {
-								println("Dataset name successfully changed from : "
-										+ file.getName() + " to " + title);
-							}
-						} finally {
-							EntityUtils.consumeQuietly(resEntity);
-							nameResponse.close();
+					CloseableHttpResponse nameResponse = httpclient.execute(
+							namePut, localContext);
+					resEntity = null;
+					try {
+						resEntity = nameResponse.getEntity();
+						if (nameResponse.getStatusLine().getStatusCode() != 200) {
+							println("Error response when processing "
+									+ file.getAbsolutePath()
+									+ " : "
+									+ nameResponse.getStatusLine()
+											.getReasonPhrase());
+							println("Details: "
+									+ EntityUtils.toString(resEntity));
+						} else {
+							println("Dataset name successfully changed from : "
+									+ file.getName() + " to " + title);
 						}
+					} finally {
+						EntityUtils.consumeQuietly(resEntity);
+						nameResponse.close();
 					}
+				}
 
-					// FixMe Add tags
-					if (tagValues != null) {
-						HttpPost tagPost = new HttpPost(server + "/api/files/"
-								+ dataId + "/tags");
-						JSONObject tags = new JSONObject();
+				// FixMe Add tags
+				if (tagValues != null) {
+					HttpPost tagPost = new HttpPost(server + "/api/files/"
+							+ dataId + "/tags");
+					JSONObject tags = new JSONObject();
 
-						String[] tagArray = tagValues.split(",");
-						JSONArray tagList = new JSONArray(tagArray);
-						tags.put("tags", tagList);
+					String[] tagArray = tagValues.split(",");
+					JSONArray tagList = new JSONArray(tagArray);
+					tags.put("tags", tagList);
 
-						StringEntity se3 = new StringEntity(tags.toString(),
-								"UTF-8");
-						se3.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-								"application/json; charset=utf-8"));
-						tagPost.setEntity(se3);
+					StringEntity se3 = new StringEntity(tags.toString(),
+							"UTF-8");
+					se3.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+							"application/json; charset=utf-8"));
+					tagPost.setEntity(se3);
 
-						CloseableHttpResponse tagResponse = httpclient.execute(
-								tagPost, localContext);
-						resEntity = null;
-						try {
-							resEntity = tagResponse.getEntity();
-							if (tagResponse.getStatusLine().getStatusCode() != 200) {
-								println("Error response when processing "
-										+ file.getAbsolutePath()
-										+ " : "
-										+ tagResponse.getStatusLine()
-												.getReasonPhrase());
-								println("Details: "
-										+ EntityUtils.toString(resEntity));
-							}
-						} finally {
-							EntityUtils.consumeQuietly(resEntity);
-							tagResponse.close();
+					CloseableHttpResponse tagResponse = httpclient.execute(
+							tagPost, localContext);
+					resEntity = null;
+					try {
+						resEntity = tagResponse.getEntity();
+						if (tagResponse.getStatusLine().getStatusCode() != 200) {
+							println("Error response when processing "
+									+ file.getAbsolutePath()
+									+ " : "
+									+ tagResponse.getStatusLine()
+											.getReasonPhrase());
+							println("Details: "
+									+ EntityUtils.toString(resEntity));
 						}
-
-					}
-					if (comments.size() > 0) {
-						Collections.sort(comments);
-						for (String text : comments.toArray(new String[comments
-								.size()])) {
-							HttpPost commentPost = new HttpPost(server
-									+ "/api/files/" + dataId + "/comment");
-
-							JSONObject comment = new JSONObject();
-							comment.put("text", text);
-
-							StringEntity se4 = new StringEntity(
-									comment.toString(), "UTF-8");
-							se4.setContentType(new BasicHeader(
-									HTTP.CONTENT_TYPE,
-									"application/json; charset=utf-8"));
-							commentPost.setEntity(se4);
-
-							CloseableHttpResponse commentResponse = httpclient
-									.execute(commentPost, localContext);
-							resEntity = null;
-							try {
-								resEntity = commentResponse.getEntity();
-								if (commentResponse.getStatusLine()
-										.getStatusCode() != 200) {
-									println("Error response when processing "
-											+ file.getAbsolutePath()
-											+ " : "
-											+ commentResponse.getStatusLine()
-													.getReasonPhrase());
-									println("Details: "
-											+ EntityUtils.toString(resEntity));
-								}
-							} finally {
-								EntityUtils.consumeQuietly(resEntity);
-								commentResponse.close();
-							}
-						}
+					} finally {
+						EntityUtils.consumeQuietly(resEntity);
+						tagResponse.close();
 					}
 
 				}
+				if (comments.size() > 0) {
+					Collections.sort(comments);
+					for (String text : comments.toArray(new String[comments
+							.size()])) {
+						HttpPost commentPost = new HttpPost(server
+								+ "/api/files/" + dataId + "/comment");
+
+						JSONObject comment = new JSONObject();
+						comment.put("text", text);
+
+						StringEntity se4 = new StringEntity(comment.toString(),
+								"UTF-8");
+						se4.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+								"application/json; charset=utf-8"));
+						commentPost.setEntity(se4);
+
+						CloseableHttpResponse commentResponse = httpclient
+								.execute(commentPost, localContext);
+						resEntity = null;
+						try {
+							resEntity = commentResponse.getEntity();
+							if (commentResponse.getStatusLine().getStatusCode() != 200) {
+								println("Error response when processing "
+										+ file.getAbsolutePath()
+										+ " : "
+										+ commentResponse.getStatusLine()
+												.getReasonPhrase());
+								println("Details: "
+										+ EntityUtils.toString(resEntity));
+							}
+						} finally {
+							EntityUtils.consumeQuietly(resEntity);
+							commentResponse.close();
+						}
+					}
+				}
+
 			}
 		} catch (IOException e) {
 			println("Error processing " + file.getAbsolutePath() + " : "
